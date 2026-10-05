@@ -1,0 +1,388 @@
+/* ==========================================================
+   CANILLITA — tokens del manual de marca
+   ========================================================== */
+:root {
+  --verde-cani: #006938;
+  --verde-claro: #599676;
+  --verde-oscuro: #0a4c2b;
+  --crema: #fdfdf4;
+  --crema-oscura: #e2e1d0;
+  --naranja: #e2670c;
+  --negro: #000000;
+
+  /* Titulares: Nickel Gothic Variable (Anchura 46 | Inclinación 0).
+     Anton es un reemplazo provisorio hasta cargar la fuente con licencia. */
+  --font-titular: "Nickel Gothic Variable", "Anton", Impact, sans-serif;
+  /* Texto general: Helvetica Now Display. Inter Tight como provisoria. */
+  --font-texto: "Helvetica Now Display", "Inter Tight", "Helvetica Neue", Helvetica, Arial, sans-serif;
+
+  --gutter: clamp(16px, 4vw, 40px);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-texto);
+  font-kerning: normal;            /* manual: kerning óptico */
+  text-rendering: optimizeLegibility;
+  background: var(--crema);
+  color: var(--verde-cani);
+  line-height: 1.4;
+}
+body.is-loading { overflow: hidden; }
+
+a { color: inherit; text-decoration: none; }
+
+/* ==========================================================
+   INTRO — puertas del puesto
+   Coordenadas de las puertas medidas sobre la imagen 1448×1086
+   ========================================================== */
+.intro {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  overflow: hidden;
+}
+.intro__stage {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: max(100vw, 133.35vh);      /* "cover" manteniendo proporción */
+  aspect-ratio: 1448 / 1086;
+  transform: translate(-50%, -50%);
+  transform-origin: 50.76% 54.79%;  /* centro de las puertas */
+  perspective: 1600px;
+  transition: transform 1.2s cubic-bezier(.65, 0, .35, 1);
+}
+.intro__closed {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.intro__door {
+  position: absolute;
+  top: 35.45%;
+  height: 38.68%;
+  overflow: hidden;
+  backface-visibility: hidden;
+  transition: transform .6s cubic-bezier(.55, 0, .25, 1), opacity .25s ease .35s;
+}
+.intro__door img { position: absolute; display: block; height: auto; }
+
+.intro__door--left {
+  left: 19.68%;
+  width: 29.08%;
+  transform-origin: left center;
+}
+.intro__door--left img { width: 343.88%; left: -67.68%; top: -91.65%; }
+
+.intro__door--right {
+  left: 48.76%;
+  width: 33.08%;
+  transform-origin: right center;
+}
+.intro__door--right img { width: 302.3%; left: -147.4%; top: -91.65%; }
+
+/* estados: el JS calcula --tx, --ty y --s para que las puertas llenen la pantalla */
+.intro.is-zooming .intro__stage {
+  transform: translate(-50%, -50%) translate(var(--tx), var(--ty)) scale(var(--s));
+}
+.intro.is-opening .intro__closed { visibility: hidden; }
+.intro.is-opening .intro__door--left  { transform: rotateY(-100deg); opacity: 0; }
+.intro.is-opening .intro__door--right { transform: rotateY(100deg);  opacity: 0; }
+
+.intro__skip {
+  position: absolute;
+  right: var(--gutter);
+  bottom: var(--gutter);
+  font: 500 14px var(--font-texto);
+  color: var(--crema);
+  background: rgba(0, 0, 0, .35);
+  border: 0;
+  border-radius: 999px;
+  padding: 8px 16px;
+  cursor: pointer;
+}
+
+/* ==========================================================
+   HEADER
+   ========================================================== */
+.header {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+  padding: 16px var(--gutter);
+  color: var(--crema);
+  border-bottom: 1px solid transparent;
+  transition: background .3s ease, color .3s ease, border-color .3s ease;
+}
+.header.is-solid {
+  background: var(--crema);
+  color: var(--verde-cani);
+  border-bottom-color: var(--verde-cani);
+}
+
+/* Logo: provisorio en texto. Reemplazar por el SVG oficial
+   (manual: no reescribir el logo con otra tipografía). */
+.logo {
+  font-family: var(--font-texto);
+  font-weight: 900;
+  font-size: 28px;
+  letter-spacing: -0.04em;
+  color: inherit;
+}
+
+.nav { display: flex; gap: clamp(12px, 3vw, 32px); flex-wrap: wrap; }
+.nav a { font-weight: 500; font-size: 16px; }
+.nav { align-items: center; }
+.nav a:not(.nav__cta):hover { text-decoration: underline; text-underline-offset: 4px; }
+/* Inversores: único naranja del header */
+.nav .nav__cta {
+  padding: 8px 18px;
+  border-radius: 999px;
+  background: var(--naranja);
+  color: var(--crema);
+  font-weight: 700;
+}
+.nav .nav__cta:hover { background: var(--verde-oscuro); }
+
+/* ==========================================================
+   TIPOGRAFÍA
+   Nickel Gothic: solo titulares cortos, siempre en mayúsculas
+   ========================================================== */
+.headline {
+  font-family: var(--font-titular);
+  font-weight: 400;
+  text-transform: uppercase;
+  line-height: 1.08;
+  font-size: clamp(56px, 11vw, 180px);
+  margin-bottom: 40px;
+}
+.subhead { font-weight: 700; font-size: 22px; margin-bottom: 16px; }
+
+/* ==========================================================
+   SECCIONES
+   ========================================================== */
+.section { padding: clamp(64px, 10vw, 120px) var(--gutter); }
+.section--cream { background: var(--crema); color: var(--verde-cani); }
+.section--green { background: var(--verde-cani); color: var(--crema); }
+.section--dark  { background: var(--verde-oscuro); color: var(--crema); }
+
+/* HERO: el interior del puesto visto de frente, dibujado en blanco */
+.hero {
+  position: relative;
+  height: 100vh;
+  min-height: 560px;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+  padding: var(--gutter);
+  background: var(--verde-cani);
+  color: var(--crema);
+}
+.hero .doodles { position: absolute; inset: 0; width: 100%; height: 100%; }
+.hero__bottom {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.doodles path {
+  fill: none;
+  stroke: var(--crema);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  transition: stroke-dashoffset .55s ease-out;
+  transition-delay: calc(var(--i, 0) * 55ms);
+}
+.is-drawn .doodles path { stroke-dashoffset: 0; }
+
+/* el canillita se "dibuja" con una pasada de lápiz en zigzag */
+.doodles .cani__reveal {
+  stroke: #fff;
+  stroke-width: 170;
+  transition: stroke-dashoffset 1.2s ease-in-out .3s;
+}
+
+.hero__title {
+  font-family: var(--font-titular);
+  font-size: 66px;
+  text-transform: uppercase;
+  fill: var(--crema);
+  opacity: 0;
+  transition: opacity .45s ease .7s;
+}
+.hero__subtitle {
+  font-family: var(--font-texto);
+  font-size: 18px;
+  font-weight: 400;
+  fill: var(--crema);
+  opacity: 0;
+  transition: opacity .45s ease .9s;
+}
+.is-drawn .hero__title,
+.is-drawn .hero__subtitle { opacity: 1; }
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* premios: se leen como distinciones, no como botones */
+.awards { list-style: none; display: flex; gap: 32px; flex-wrap: wrap; }
+.awards li {
+  padding-left: 12px;
+  border-left: 2px solid var(--crema);
+  font-weight: 700;
+  font-size: 15px;
+  text-transform: uppercase;
+  line-height: 1.2;
+}
+.awards span {
+  display: block;
+  font-weight: 400;
+  font-size: 12px;
+  opacity: .8;
+}
+
+/* CTA principal (dentro del SVG, en el piso del puesto) */
+.cta rect { fill: var(--naranja); transition: fill .2s ease; }
+.cta text {
+  font-family: var(--font-texto);
+  font-weight: 700;
+  font-size: 17px;
+  fill: var(--crema);
+  transition: fill .2s ease;
+}
+.cta:hover rect { fill: var(--crema); }
+.cta:hover text { fill: var(--verde-cani); }
+.cta--ghost rect { fill: transparent; stroke: var(--crema); stroke-width: 2; }
+.cta--ghost:hover rect { fill: var(--crema); }
+.cta { opacity: 0; transition: opacity .45s ease 1.1s; }
+.is-drawn .cta { opacity: 1; }
+
+/* TIRA DE NÚMEROS (Nickel Gothic admitido para cifras) */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  background: var(--crema);
+  border-bottom: 1px solid var(--verde-cani);
+}
+.stat {
+  padding: 40px var(--gutter);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.stat + .stat { border-left: 1px solid var(--verde-cani); }
+.stat strong {
+  font-family: var(--font-titular);
+  font-weight: 400;
+  font-size: clamp(48px, 6vw, 88px);
+  line-height: 1;
+  text-transform: uppercase;
+}
+.stat span { font-size: 16px; }
+
+/* GRIDS */
+.grid { display: grid; gap: 16px; }
+.grid--2 { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+.grid--3 { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+.grid--4 { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+
+.card {
+  aspect-ratio: 4 / 5;
+  display: flex;
+  align-items: flex-end;
+  padding: 20px;
+  border-radius: 20px;
+  background: var(--crema-oscura);
+  font-weight: 700;
+  font-size: 20px;
+}
+.card--dark { background: var(--verde-cani); }
+
+/* tarjeta con video de fondo */
+.card--media {
+  position: relative;
+  overflow: hidden;
+  color: var(--crema);
+  background: var(--verde-oscuro);
+}
+.card--media video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.card--media::after {           /* degradé para que el texto se lea sobre el video */
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, .55), transparent 45%);
+}
+.card--media span { position: relative; z-index: 1; }
+
+.place {
+  padding: 24px;
+  border: 1px solid var(--crema);
+  border-radius: 20px;
+}
+.place h3 { font-size: 22px; margin-bottom: 8px; }
+
+.block + .block { margin-top: 56px; }
+
+.award {
+  padding: 32px 24px;
+  border-radius: 20px;
+  background: var(--verde-cani);
+  color: var(--crema);
+  font-weight: 800;
+  font-size: 24px;
+}
+
+.press { list-style: none; border-top: 1px solid var(--verde-cani); }
+.press li { padding: 16px 0; border-bottom: 1px solid var(--verde-cani); }
+
+/* FOOTER */
+.footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 40px var(--gutter);
+  background: var(--negro);
+  color: var(--crema);
+}
+.footer .logo { color: var(--crema); }
+.footer__links { display: flex; gap: 24px; flex-wrap: wrap; }
+.footer__links a:hover { color: var(--naranja); }
+
+@media (prefers-reduced-motion: reduce) {
+  .intro { display: none; }
+}

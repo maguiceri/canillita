@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Canillita</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter+Tight:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="is-loading">
+
+  <!-- INTRO: puesto cerrado → zoom a las puertas → se abren → aparece el inicio -->
+  <div class="intro" id="intro" aria-hidden="true">
+    <div class="intro__stage">
+      <!-- OJO: puestoAbierto.png es en realidad la imagen del puesto CERRADO -->
+      <img class="intro__closed" src="puestoAbierto.png" alt="">
+      <div class="intro__door intro__door--left"><img src="puestoAbierto.png" alt=""></div>
+      <div class="intro__door intro__door--right"><img src="puestoAbierto.png" alt=""></div>
+    </div>
+    <button class="intro__skip" type="button">Saltar</button>
+  </div>
+
+  <header class="header">
+    <a href="#top" class="logo">canillita</a>
+    <nav class="nav">
+      <a href="#puestos">Puestos</a>
+      <a href="#comunidad">Comunidad</a>
+      <a href="#nosotros">Nosotros</a>
+      <a href="#inversores" class="nav__cta">Inversores</a>
+    </nav>
+  </header>
+
+  <main id="top">
+
+    <!-- HERO: interior del puesto, plano, dibujado en blanco -->
+    <section class="hero">
+      <h1 class="sr-only">Canillita — No somos una cafetería</h1>
+      <p class="sr-only">Transformamos puestos de diarios en una red de cafeterías de especialidad y plataforma de marca.</p>
+      <!-- interior del puesto (puestoVacio.png, coordenadas sobre 1787×880) + dibujos a mano -->
+      <svg class="doodles" viewBox="360 150 1070 630" preserveAspectRatio="xMidYMid slice">
+        <defs>
+          <filter id="rough">
+            <feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="4"/>
+            <feDisplacementMap in="SourceGraphic" scale="5"/>
+          </filter>
+        </defs>
+        <image href="puestoVacio.png" x="0" y="0" width="1787" height="880"/>
+        <g filter="url(#rough)">
+          <!-- interior -->
+          <path d="M520 300 H1265 V618 H520 Z"/>
+          <path d="M443 250 L520 300 M1342 250 L1265 300 M443 645 L520 618 M1342 645 L1265 618"/>
+          <path d="M520 480 H1265"/>
+          <!-- vasos + vapor -->
+          <path d="M770 458 H794 L790 480 H774 Z M830 450 H858 L853 480 H835 Z"/>
+          <path d="M844 440 q-8 -12 0 -24 q8 -12 0 -24"/>
+          <!-- molinillo -->
+          <path d="M935 345 H995 L982 395 H948 Z M950 395 H980 V480 H950 Z"/>
+          <!-- cafetera -->
+          <path d="M1010 480 V380 Q1010 370 1020 370 H1130 Q1140 370 1140 380 V480"/>
+          <path d="M1045 392 H1105 Q1112 398 1105 404 H1045 Q1038 398 1045 392 Z"/>
+          <path d="M1055 450 V462 M1095 450 V462"/>
+          <!-- mostrador -->
+          <path d="M395 700 H1380"/>
+        </g>
+        <!-- el canillita, detrás del estante (el estante lo corta a la cintura) -->
+        <svg class="cani" x="540" y="296" width="220" height="183" viewBox="0 0 1376 1143">
+          <mask id="cani-reveal" maskUnits="userSpaceOnUse" x="0" y="0" width="1376" height="1143">
+            <path class="cani__reveal" d="M0 0 L1376 85 L0 170 L1376 255 L0 340 L1376 425 L0 510 L1376 595 L0 680 L1376 765 L0 850 L1376 935 L0 1020 L1376 1105 L0 1190"/>
+          </mask>
+          <image href="canillita-linea.png" width="1376" height="1143" mask="url(#cani-reveal)"/>
+        </svg>
+        <!-- titular en la pared del fondo, debajo del estante -->
+        <text class="hero__title" aria-hidden="true" x="893" y="554" text-anchor="middle">No somos una cafetería</text>
+        <text class="hero__subtitle" aria-hidden="true" x="893" y="585" text-anchor="middle">
+          <tspan x="893">Transformamos puestos de diarios en una red de cafeterías</tspan>
+          <tspan x="893" dy="22">de especialidad y plataforma de marca.</tspan>
+        </text>
+        <!-- CTAs en el piso del puesto -->
+        <a class="cta" href="#inversores">
+          <rect x="715" y="636" width="190" height="46" rx="23"/>
+          <text x="810" y="665" text-anchor="middle">Conocé el modelo</text>
+        </a>
+        <a class="cta cta--ghost" href="#puestos">
+          <rect x="921" y="636" width="150" height="46" rx="23"/>
+          <text x="996" y="665" text-anchor="middle">Ver puestos</text>
+        </a>
+      </svg>
+      <div class="hero__bottom">
+        <ul class="awards" aria-label="Premios">
+          <li><span>Premio</span>Buenos Aires Diseña</li>
+          <li><span>Premio</span>Top 100 Sudamérica</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- TIRA DE NÚMEROS -->
+    <section class="stats" aria-label="Canillita en números">
+      <div class="stat"><strong>+1.200</strong><span>puestos habilitados en CABA</span></div>
+      <div class="stat"><strong>+500.000</strong><span>interacciones mensuales</span></div>
+      <div class="stat"><strong>Top 100</strong><span>Sudamérica</span></div>
+    </section>
+
+    <!-- PUESTOS -->
+    <section class="section section--green" id="puestos">
+      <h2 class="headline">Puestos</h2>
+      <div class="grid grid--3">
+        <div class="place">
+          <h3>Puesto 1</h3>
+          <p>Dirección</p>
+          <p>Horarios</p>
+        </div>
+        <div class="place">
+          <h3>Puesto 2</h3>
+          <p>Dirección</p>
+          <p>Horarios</p>
+        </div>
+        <div class="place">
+          <h3>Puesto 3</h3>
+          <p>Dirección</p>
+          <p>Horarios</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- CENTRO DE PRODUCCIÓN PROPIO (antes Productos) -->
+    <section class="section section--cream" id="productos">
+      <h2 class="headline">Centro de producción propio</h2>
+      <div class="grid grid--4">
+        <div class="card card--media">
+          <!-- clip-cafe + cuchara + vaso, a 1.5x, en loop (se reproduce solo cuando está a la vista) -->
+          <video class="loop-video" src="videos/cafe-loop.mp4" poster="videos/cafe-loop.jpg"
+                 muted loop playsinline preload="none" aria-hidden="true"></video>
+          <span>Café</span>
+        </div>
+        <div class="card">Pastelería</div>
+        <div class="card">Bebidas frías</div>
+        <div class="card">Merch</div>
+      </div>
+    </section>
+
+    <!-- COMUNIDAD -->
+    <section class="section section--dark" id="comunidad">
+      <h2 class="headline">Comunidad</h2>
+      <div class="grid grid--3">
+        <div class="card card--dark">Eventos</div>
+        <div class="card card--dark">Artistas emergentes</div>
+        <div class="card card--dark">Colaboraciones</div>
+      </div>
+    </section>
+
+    <!-- NOSOTROS -->
+    <section class="section section--cream" id="nosotros">
+      <h2 class="headline">Nosotros</h2>
+
+      <div class="block">
+        <h3 class="subhead">Historia y concepto</h3>
+        <p>Es mucho más que una cafetería, <strong>es un movimiento urbano</strong>.</p>
+      </div>
+
+      <div class="block">
+        <h3 class="subhead">Premios</h3>
+        <div class="grid grid--2">
+          <div class="award">Buenos Aires Diseña</div>
+          <div class="award">Top 100 Sudamérica</div>
+        </div>
+      </div>
+
+      <div class="block">
+        <h3 class="subhead">Prensa</h3>
+        <ul class="press">
+          <li>Medio — Título de la nota</li>
+          <li>Medio — Título de la nota</li>
+          <li>Medio — Título de la nota</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- INVERSORES -->
+    <section class="section section--green" id="inversores">
+      <h2 class="headline">Inversores</h2>
+      <div class="grid grid--3">
+        <div class="place"><h3>El modelo</h3></div>
+        <div class="place"><h3>Tracción</h3></div>
+        <div class="place"><h3>Contacto</h3></div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <span class="logo">canillita</span>
+    <div class="footer__links">
+      <a href="#">Trabajá con nosotros</a>
+      <a href="https://instagram.com/canillita_ok" target="_blank" rel="noopener">@canillita_ok</a>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
