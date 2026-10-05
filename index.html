@@ -24,7 +24,8 @@
 
   <header class="header">
     <a href="#top" class="logo">canillita</a>
-    <nav class="nav">
+    <button class="nav__toggle" type="button" aria-expanded="false" aria-controls="nav">Menú</button>
+    <nav class="nav" id="nav">
       <a href="#puestos">Puestos</a>
       <a href="#comunidad">Comunidad</a>
       <a href="#nosotros">Nosotros</a>
@@ -49,9 +50,11 @@
         <image href="puestoVacio.png" x="0" y="0" width="1787" height="880"/>
         <g filter="url(#rough)">
           <!-- interior -->
-          <path d="M520 300 H1265 V618 H520 Z"/>
-          <path d="M443 250 L520 300 M1342 250 L1265 300 M443 645 L520 618 M1342 645 L1265 618"/>
+          <path class="frame" d="M520 300 H1265 V618 H520 Z"/>
+          <path class="frame" d="M443 250 L520 300 M1342 250 L1265 300 M443 645 L520 618 M1342 645 L1265 618"/>
           <path d="M520 480 H1265"/>
+          <!-- objetos del estante: en celular se achican juntos para entrar en pantalla -->
+          <g class="props">
           <!-- vasos + vapor -->
           <path d="M770 458 H794 L790 480 H774 Z M830 450 H858 L853 480 H835 Z"/>
           <path d="M844 440 q-8 -12 0 -24 q8 -12 0 -24"/>
@@ -61,16 +64,19 @@
           <path d="M1010 480 V380 Q1010 370 1020 370 H1130 Q1140 370 1140 380 V480"/>
           <path d="M1045 392 H1105 Q1112 398 1105 404 H1045 Q1038 398 1045 392 Z"/>
           <path d="M1055 450 V462 M1095 450 V462"/>
+          </g>
           <!-- mostrador -->
-          <path d="M395 700 H1380"/>
+          <path class="frame" d="M395 700 H1380"/>
         </g>
         <!-- el canillita, detrás del estante (el estante lo corta a la cintura) -->
+        <g class="props">
         <svg class="cani" x="540" y="296" width="220" height="183" viewBox="0 0 1376 1143">
           <mask id="cani-reveal" maskUnits="userSpaceOnUse" x="0" y="0" width="1376" height="1143">
             <path class="cani__reveal" d="M0 0 L1376 85 L0 170 L1376 255 L0 340 L1376 425 L0 510 L1376 595 L0 680 L1376 765 L0 850 L1376 935 L0 1020 L1376 1105 L0 1190"/>
           </mask>
           <image href="canillita-linea.png" width="1376" height="1143" mask="url(#cani-reveal)"/>
         </svg>
+        </g>
         <!-- titular en la pared del fondo, debajo del estante -->
         <text class="hero__title" aria-hidden="true" x="893" y="554" text-anchor="middle">No somos una cafetería</text>
         <text class="hero__subtitle" aria-hidden="true" x="893" y="585" text-anchor="middle">
@@ -87,6 +93,15 @@
           <text x="996" y="665" text-anchor="middle">Ver puestos</text>
         </a>
       </svg>
+      <!-- versión celular del titular, la bajada y los botones (en escritorio van dentro del dibujo) -->
+      <div class="hero__content">
+        <p class="hero__m-title" aria-hidden="true">No somos una cafetería</p>
+        <p class="hero__m-subtitle" aria-hidden="true">Transformamos puestos de diarios en una red de cafeterías de especialidad y plataforma de marca.</p>
+        <div class="hero__m-ctas">
+          <a class="btn" href="#inversores">Conocé el modelo</a>
+          <a class="btn btn--ghost" href="#puestos">Ver puestos</a>
+        </div>
+      </div>
       <div class="hero__bottom">
         <ul class="awards" aria-label="Premios">
           <li><span>Premio</span>Buenos Aires Diseña</li>

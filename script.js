@@ -17,6 +17,26 @@
   window.addEventListener('scroll', onScroll, { passive: true });
   onScroll();
 
+  // en pantallas angostas el dibujo se recorta a los costados:
+  // se achican los objetos del estante para que entren a lo ancho
+  function fitProps() {
+    const visible = 630 * hero.offsetWidth / hero.offsetHeight; // ancho visible en unidades del dibujo
+    const k = Math.min(1, (visible * 0.94) / 600);              // los objetos ocupan 600 unidades
+    hero.style.setProperty('--k', k.toFixed(3));
+    hero.style.setProperty('--dx', k < 1 ? '53px' : '0px');           // al achicarse, se centran en pantalla
+  }
+  window.addEventListener('resize', fitProps);
+  fitProps();
+
+  // menú en celular
+  const toggle = header.querySelector('.nav__toggle');
+  const setMenu = open => {
+    header.classList.toggle('is-open', open);
+    toggle.setAttribute('aria-expanded', open);
+  };
+  toggle.addEventListener('click', () => setMenu(!header.classList.contains('is-open')));
+  header.querySelectorAll('.nav a').forEach(a => a.addEventListener('click', () => setMenu(false)));
+
   // zona de las puertas dentro de la imagen del puesto cerrado (en % de la imagen)
   const DOORS = { left: 0.1968, right: 0.8184, top: 0.3545, bottom: 0.7413 };
 

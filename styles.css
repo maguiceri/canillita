@@ -383,6 +383,122 @@ a { color: inherit; text-decoration: none; }
 .footer__links { display: flex; gap: 24px; flex-wrap: wrap; }
 .footer__links a:hover { color: var(--naranja); }
 
+/* objetos del estante: --k lo calcula el JS (1 en escritorio, menor en pantallas angostas) */
+.props {
+  transform-origin: 840px 480px;
+  transform: translate(var(--dx, 0px), 0) scale(var(--k, 1));
+}
+
+/* elementos que solo existen en celular */
+.nav__toggle,
+.hero__content { display: none; }
+
+.btn {
+  display: inline-block;
+  padding: 13px 20px;
+  border-radius: 999px;
+  border: 2px solid var(--naranja);
+  background: var(--naranja);
+  color: var(--crema);
+  font-weight: 700;
+  font-size: 15px;
+  white-space: nowrap;
+}
+.btn--ghost { background: transparent; border-color: var(--crema); }
+
+/* ==========================================================
+   PORTADA EN PANTALLAS VERTICALES / ANGOSTAS
+   El dibujo se recorta a los costados, así que el texto y los
+   botones pasan a HTML y los objetos del estante se achican.
+   ========================================================== */
+@media (max-aspect-ratio: 6/5) {
+  .hero { height: 100svh; }
+  .doodles .frame,
+  .doodles .hero__title,
+  .doodles .hero__subtitle,
+  .doodles .cta { display: none; }
+
+  .hero__content {
+    position: absolute;
+    top: 54.5%;                      /* justo debajo del estante */
+    left: var(--gutter);
+    right: var(--gutter);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    text-align: center;
+    opacity: 0;
+    transition: opacity .45s ease .7s;
+  }
+  .is-drawn .hero__content { opacity: 1; }
+  .hero__m-title {
+    font-family: var(--font-titular);
+    font-size: min(13vw, 6.2svh);
+    line-height: 1.05;
+    text-transform: uppercase;
+    max-width: 8em;
+  }
+  .hero__m-subtitle { font-size: clamp(14px, 2svh, 18px); max-width: 30em; }
+  .hero__m-ctas { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 6px; }
+}
+
+/* ==========================================================
+   CELULAR
+   ========================================================== */
+@media (max-width: 760px) {
+  /* menú desplegable */
+  .nav__toggle {
+    display: block;
+    font: 700 15px var(--font-texto);
+    color: inherit;
+    background: none;
+    border: 1.5px solid currentColor;
+    border-radius: 999px;
+    padding: 7px 16px;
+    cursor: pointer;
+  }
+  .header { flex-wrap: nowrap; }
+  .header.is-open {
+    background: var(--crema);
+    color: var(--verde-cani);
+    border-bottom-color: var(--verde-cani);
+  }
+  .nav {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    padding: 8px var(--gutter) 20px;
+    background: var(--crema);
+    color: var(--verde-cani);
+    border-bottom: 1px solid var(--verde-cani);
+  }
+  .header.is-open .nav { display: flex; }
+  .nav a { padding: 14px 0; font-size: 18px; border-bottom: 1px solid var(--crema-oscura); }
+  .nav .nav__cta { margin-top: 16px; padding: 14px 18px; text-align: center; border-bottom: 0; }
+
+  .awards { gap: 20px; }
+  .awards li { font-size: 13px; }
+  .awards span { font-size: 11px; }
+
+  /* números apilados */
+  .stats { grid-template-columns: 1fr; }
+  .stat { padding: 28px var(--gutter); }
+  .stat + .stat { border-left: 0; border-top: 1px solid var(--verde-cani); }
+
+  .headline { font-size: clamp(48px, 15vw, 96px); margin-bottom: 28px; overflow-wrap: anywhere; }
+  .grid--4 { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .card { padding: 14px; font-size: 17px; border-radius: 16px; }
+  .grid--3 .card { aspect-ratio: 16 / 9; }   /* en una columna, tarjetas más bajas */
+  .award { font-size: 20px; padding: 24px 20px; }
+  .footer { flex-direction: column; align-items: flex-start; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .intro { display: none; }
 }
