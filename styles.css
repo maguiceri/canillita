@@ -185,7 +185,7 @@ a, button { -webkit-tap-highlight-color: transparent; }
 .btn:active, .nav__cta:active, .nav__toggle:active, .intro__skip:active { transform: scale(.96); opacity: .85; }
 .cta:active rect { fill: var(--crema); }
 .cta:active text { fill: var(--verde-cani); }
-.nav a:not(.nav__cta):active, .footer__links a:active { opacity: .6; }
+.nav a:not(.nav__cta):active { opacity: .6; }
 
 /* ==========================================================
    TIPOGRAFÍA
@@ -395,23 +395,109 @@ a, button { -webkit-tap-highlight-color: transparent; }
   font-size: 24px;
 }
 
-.press { list-style: none; border-top: 1px solid var(--verde-cani); }
-.press li { padding: 16px 0; border-bottom: 1px solid var(--verde-cani); }
+/* ACTIVÁ TU MARCA */
+.lead { font-size: clamp(17px, 1.5vw, 22px); max-width: 34em; margin: -16px 0 32px; }
+.brands { margin: 40px 0 32px; }
+.eyebrow { font-size: 13px; font-weight: 700; text-transform: uppercase; margin-bottom: 12px; }
+.pills { list-style: none; display: flex; flex-wrap: wrap; gap: 12px; }
+.pills li {
+  padding: 10px 22px;
+  border: 1.5px solid currentColor;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 16px;
+}
+.btn.btn--lg { padding: 16px 30px; font-size: 18px; }
+.btn.btn--outline { background: transparent; border-color: var(--verde-cani); color: var(--verde-cani); }
+.btn.btn--outline:hover { background: var(--verde-cani); color: var(--crema); }
+.section--green .card { color: var(--verde-cani); }
+
+/* INVERSORES: franja de cierre */
+.invest {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px 40px;
+  flex-wrap: wrap;
+  margin: 0 var(--gutter);
+  padding: 48px 0 56px;
+  border-top: 1px solid var(--verde-cani);
+  background: var(--crema);
+}
+.invest h2 { font-size: clamp(26px, 3vw, 40px); font-weight: 700; line-height: 1.15; margin-bottom: 8px; }
+.invest p { font-size: 18px; }
+.btn:hover { background: var(--crema); border-color: var(--crema); color: var(--verde-cani); }
+
+/* NOSOTROS: título + historia a la izquierda, foto de fundadores a la derecha */
+.about {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  align-items: start;
+  margin-bottom: 56px;
+}
+.about .headline { margin-bottom: 24px; }
+.founders {
+  position: relative;
+  aspect-ratio: 20 / 7;
+  border-radius: 20px;
+  overflow: hidden;
+  background: var(--crema-oscura);
+}
+.founders img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.founders::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, .6), transparent 55%);
+}
+.founders figcaption {
+  position: absolute;
+  left: 20px;
+  bottom: 16px;
+  z-index: 1;
+  color: var(--crema);
+  font-size: 14px;
+}
+.founders figcaption strong { display: block; font-size: 18px; }
+
+/* PRENSA */
+.press-card {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 20px;
+  border: 1px solid var(--verde-cani);
+  border-radius: 20px;
+}
+.press-card__art {
+  flex: none;
+  width: 120px;
+  aspect-ratio: 1;
+  border-radius: 12px;
+  background: var(--crema-oscura);
+}
+.press-card h4 { font-size: 20px; }
+.press-card p { font-size: 15px; margin: 4px 0 20px; }
+.press-card a { font-size: 14px; font-weight: 700; color: var(--naranja); }
+.press-card a:hover { text-decoration: underline; }
 
 /* FOOTER */
 .footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 16px;
-  padding: 40px var(--gutter);
+  display: grid;
+  grid-template-columns: 1fr 1.6fr;
+  gap: 40px;
+  padding: 48px var(--gutter) 96px;
   background: var(--negro);
   color: var(--crema);
 }
-.footer .logo { color: var(--crema); }
-.footer__links { display: flex; gap: 24px; flex-wrap: wrap; }
-.footer__links a:hover { color: var(--naranja); }
+.footer__brand { display: flex; flex-direction: column; gap: 6px; font-size: 15px; }
+.footer .logo { color: var(--crema); font-size: 44px; line-height: 1; }
+.footer__nav { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+.footer__nav ul { list-style: none; }
+.footer__nav a { display: inline-block; padding: 5px 0; font-size: 17px; }
+.footer__nav a:hover { text-decoration: underline; text-underline-offset: 4px; }
+.footer__nav a:active { opacity: .6; }
 
 /* objetos del estante: --k lo calcula el JS (1 en escritorio, menor en pantallas angostas) */
 .props {
@@ -550,9 +636,16 @@ a, button { -webkit-tap-highlight-color: transparent; }
   .card { padding: 14px; font-size: 17px; border-radius: 16px; }
   .grid--3 .card { aspect-ratio: 16 / 9; }   /* en una columna, tarjetas más bajas */
   .award { font-size: 20px; padding: 24px 20px; }
-  .footer { flex-direction: column; align-items: flex-start; }
-  .footer__links { gap: 8px 24px; }
-  .footer__links a { padding: 11px 0; }
+  .lead { margin-top: -8px; }
+  .about { grid-template-columns: 1fr; margin-bottom: 40px; }
+  .founders { aspect-ratio: 16 / 9; }
+  .press-card__art { width: 88px; }
+  .btn--lg { display: block; text-align: center; }
+  .invest { padding: 40px 0 48px; }
+  .invest .btn { width: 100%; text-align: center; }
+  .footer { grid-template-columns: 1fr; padding-bottom: 56px; }
+  .footer__nav { grid-template-columns: 1fr 1fr; }
+  .footer__nav a { padding: 11px 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {

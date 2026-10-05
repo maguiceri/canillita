@@ -30,7 +30,7 @@
       <a href="#puestos">Puestos</a>
       <a href="#comunidad">Comunidad</a>
       <a href="#nosotros">Nosotros</a>
-      <a href="#inversores" class="nav__cta">Inversores</a>
+      <a href="#activa" class="nav__cta">Activá tu marca</a>
     </nav>
   </header>
 
@@ -164,13 +164,44 @@
       </div>
     </section>
 
+    <!-- ACTIVÁ TU MARCA -->
+    <section class="section section--green" id="activa">
+      <h2 class="headline">Activá tu marca</h2>
+      <p class="lead">Tu marca en las esquinas más transitadas de Buenos Aires, frente a una comunidad que ya nos sigue.</p>
+
+      <div class="grid grid--4">
+        <div class="card">Activaciones en puestos</div>
+        <div class="card">Co-branding</div>
+        <div class="card">Sampling</div>
+        <div class="card">Contenido y redes</div>
+      </div>
+
+      <div class="brands">
+        <h3 class="eyebrow">Ya activaron con nosotros</h3>
+        <ul class="pills">
+          <li>Supernova</li>
+          <li>Ohlalá</li>
+          <li>Marca</li>
+          <li>Marca</li>
+        </ul>
+      </div>
+
+      <!-- TODO: definir destino del botón (mail, WhatsApp o formulario) -->
+      <a class="btn btn--lg" href="#activa">Quiero activar mi marca</a>
+    </section>
+
     <!-- NOSOTROS -->
     <section class="section section--cream" id="nosotros">
-      <h2 class="headline">Nosotros</h2>
-
-      <div class="block">
-        <h3 class="subhead">Historia y concepto</h3>
-        <p>Es mucho más que una cafetería, <strong>es un movimiento urbano</strong>.</p>
+      <div class="about">
+        <div>
+          <h2 class="headline">Nosotros</h2>
+          <h3 class="subhead">Historia y concepto</h3>
+          <p>Es mucho más que una cafetería, <strong>es un movimiento urbano</strong>.</p>
+        </div>
+        <!-- TODO: reemplazar por la foto de los fundadores (<img> dentro del figure) -->
+        <figure class="founders">
+          <figcaption><strong>Lautaro, Gerónimo y Julián</strong>Co-founders</figcaption>
+        </figure>
       </div>
 
       <div class="block">
@@ -183,32 +214,69 @@
 
       <div class="block">
         <h3 class="subhead">Prensa</h3>
-        <ul class="press">
-          <li>Medio — Título de la nota</li>
-          <li>Medio — Título de la nota</li>
-          <li>Medio — Título de la nota</li>
-        </ul>
+        <!-- TODO: en .press-card__art va la ilustración del canillita leyendo el diario -->
+        <div class="grid grid--3">
+          <article class="press-card">
+            <div class="press-card__art"></div>
+            <div>
+              <h4>Forbes</h4>
+              <p>Título de la nota</p>
+              <a href="#nosotros">Leer la nota ›</a>
+            </div>
+          </article>
+          <article class="press-card">
+            <div class="press-card__art"></div>
+            <div>
+              <h4>iProfesional</h4>
+              <p>Título de la nota</p>
+              <a href="#nosotros">Leer la nota ›</a>
+            </div>
+          </article>
+          <article class="press-card">
+            <div class="press-card__art"></div>
+            <div>
+              <h4>Medio</h4>
+              <p>Título de la nota</p>
+              <a href="#nosotros">Leer la nota ›</a>
+            </div>
+          </article>
+        </div>
       </div>
     </section>
 
-    <!-- INVERSORES -->
-    <section class="section section--green" id="inversores">
-      <h2 class="headline">Inversores</h2>
-      <div class="grid grid--3">
-        <div class="place"><h3>El modelo</h3></div>
-        <div class="place"><h3>Tracción</h3></div>
-        <div class="place"><h3>Contacto</h3></div>
+    <!-- INVERSORES: franja de cierre -->
+    <section class="invest" id="inversores">
+      <div>
+        <h2>¿Te interesa invertir en Canillita?</h2>
+        <p>Estamos creciendo. Escribinos y te contamos el plan de expansión.</p>
       </div>
+      <!-- TODO: definir destino del botón (mail, WhatsApp o formulario) -->
+      <a class="btn btn--outline btn--lg" href="#inversores">Escribinos</a>
     </section>
 
   </main>
 
   <footer class="footer">
-    <span class="logo">canillita</span>
-    <div class="footer__links">
-      <a href="#">Trabajá con nosotros</a>
-      <a href="https://instagram.com/canillita_ok" target="_blank" rel="noopener">@canillita_ok</a>
+    <div class="footer__brand">
+      <span class="logo">canillita</span>
+      <span>café y noticias</span>
     </div>
+    <nav class="footer__nav" aria-label="Pie de página">
+      <ul>
+        <li><a href="#puestos">Puestos</a></li>
+        <li><a href="#productos">Menú</a></li>
+        <li><a href="#comunidad">Comunidad</a></li>
+        <li><a href="#nosotros">Nosotros</a></li>
+      </ul>
+      <ul>
+        <li><a href="#activa">Activá tu marca</a></li>
+        <li><a href="#">Trabajá con nosotros</a></li>
+        <li><a href="https://instagram.com/canillita_ok" target="_blank" rel="noopener">@canillita_ok</a></li>
+      </ul>
+      <ul>
+        <li><a href="#inversores">Inversores</a></li>
+      </ul>
+    </nav>
   </footer>
 
   <script src="script.js"></script>
