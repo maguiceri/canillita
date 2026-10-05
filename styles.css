@@ -566,6 +566,7 @@ a, button { -webkit-tap-highlight-color: transparent; }
     align-items: center;
     gap: 12px;
     text-align: center;
+    z-index: 1;                      /* por encima del degradé de los premios */
     opacity: 0;
     transition: opacity .45s ease .7s;
   }
@@ -579,6 +580,17 @@ a, button { -webkit-tap-highlight-color: transparent; }
   }
   .hero__m-subtitle { font-size: clamp(14px, 2svh, 18px); max-width: 30em; }
   .hero__m-ctas { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 6px; }
+}
+
+/* celulares muy bajos: no hay lugar para los premios sin tapar los botones */
+@media (max-aspect-ratio: 6/5) and (max-height: 640px) {
+  .hero__bottom,
+  .hero::after { display: none; }
+}
+/* celulares angostos: los dos botones de la portada entran en una línea */
+@media (max-width: 360px) {
+  .hero__m-ctas { gap: 8px; flex-wrap: nowrap; }
+  .hero__m-ctas .btn { padding: 12px 13px; font-size: 14px; }
 }
 
 /* ==========================================================
