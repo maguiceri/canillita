@@ -4,9 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Canillita</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter+Tight:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="preload" as="font" type="font/woff2" href="fonts/anton.woff2" crossorigin>
+  <link rel="preload" as="font" type="font/woff2" href="fonts/inter-tight.woff2" crossorigin>
+  <link rel="preload" as="image" href="puestoAbierto.webp">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body class="is-loading">
@@ -14,10 +15,10 @@
   <!-- INTRO: puesto cerrado → zoom a las puertas → se abren → aparece el inicio -->
   <div class="intro" id="intro" aria-hidden="true">
     <div class="intro__stage">
-      <!-- OJO: puestoAbierto.png es en realidad la imagen del puesto CERRADO -->
-      <img class="intro__closed" src="puestoAbierto.png" alt="">
-      <div class="intro__door intro__door--left"><img src="puestoAbierto.png" alt=""></div>
-      <div class="intro__door intro__door--right"><img src="puestoAbierto.png" alt=""></div>
+      <!-- OJO: puestoAbierto.webp es en realidad la imagen del puesto CERRADO -->
+      <img class="intro__closed" src="puestoAbierto.webp" alt="">
+      <div class="intro__door intro__door--left"><img src="puestoAbierto.webp" alt=""></div>
+      <div class="intro__door intro__door--right"><img src="puestoAbierto.webp" alt=""></div>
     </div>
     <button class="intro__skip" type="button">Saltar</button>
   </div>
@@ -39,7 +40,7 @@
     <section class="hero">
       <h1 class="sr-only">Canillita — No somos una cafetería</h1>
       <p class="sr-only">Transformamos puestos de diarios en una red de cafeterías de especialidad y plataforma de marca.</p>
-      <!-- interior del puesto (puestoVacio.png, coordenadas sobre 1787×880) + dibujos a mano -->
+      <!-- interior del puesto (puestoVacio.webp, coordenadas sobre 1787×880) + dibujos a mano -->
       <svg class="doodles" viewBox="360 150 1070 630" preserveAspectRatio="xMidYMid slice">
         <defs>
           <filter id="rough">
@@ -47,7 +48,7 @@
             <feDisplacementMap in="SourceGraphic" scale="5"/>
           </filter>
         </defs>
-        <image href="puestoVacio.png" x="0" y="0" width="1787" height="880"/>
+        <image href="puestoVacio.webp" x="0" y="0" width="1787" height="880"/>
         <g filter="url(#rough)">
           <!-- interior -->
           <path class="frame" d="M520 300 H1265 V618 H520 Z"/>
@@ -74,7 +75,7 @@
           <mask id="cani-reveal" maskUnits="userSpaceOnUse" x="0" y="0" width="1376" height="1143">
             <path class="cani__reveal" d="M0 0 L1376 85 L0 170 L1376 255 L0 340 L1376 425 L0 510 L1376 595 L0 680 L1376 765 L0 850 L1376 935 L0 1020 L1376 1105 L0 1190"/>
           </mask>
-          <image href="canillita-linea.png" width="1376" height="1143" mask="url(#cani-reveal)"/>
+          <image href="canillita-linea.webp" width="1376" height="1143" mask="url(#cani-reveal)"/>
         </svg>
         </g>
         <!-- titular en la pared del fondo, debajo del estante -->
@@ -145,7 +146,7 @@
       <div class="grid grid--4">
         <div class="card card--media">
           <!-- clip-cafe + cuchara + vaso, a 1.5x, en loop (se reproduce solo cuando está a la vista) -->
-          <video class="loop-video" src="videos/cafe-loop.mp4" poster="videos/cafe-loop.jpg"
+          <video class="loop-video" src="videos/cafe-loop.mp4" data-poster="videos/cafe-loop.webp"
                  muted loop playsinline preload="none" aria-hidden="true"></video>
           <span>Café</span>
         </div>

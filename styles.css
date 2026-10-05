@@ -19,9 +19,26 @@
   --gutter: clamp(16px, 4vw, 40px);
 }
 
+/* Fuentes provisorias, alojadas en el proyecto (más rápido que pedirlas a Google Fonts) */
+@font-face {
+  font-family: "Anton";
+  src: url("fonts/anton.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Inter Tight";
+  src: url("fonts/inter-tight.woff2") format("woff2");
+  font-weight: 300 900;            /* fuente variable: un solo archivo para todos los pesos */
+  font-display: swap;
+}
+
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
-html { scroll-behavior: smooth; }
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 88px;        /* que el header fijo no tape los títulos al navegar */
+}
 
 body {
   font-family: var(--font-texto);
@@ -34,6 +51,7 @@ body {
 body.is-loading { overflow: hidden; }
 
 a { color: inherit; text-decoration: none; }
+a, button { -webkit-tap-highlight-color: transparent; }
 
 /* ==========================================================
    INTRO — puertas del puesto
@@ -44,7 +62,9 @@ a { color: inherit; text-decoration: none; }
   inset: 0;
   z-index: 100;
   overflow: hidden;
+  background: var(--verde-cani);    /* tapa la portada mientras cargan las imágenes */
 }
+.intro.is-opening { background: transparent; }
 .intro__stage {
   position: absolute;
   left: 50%;
@@ -105,7 +125,9 @@ a { color: inherit; text-decoration: none; }
   background: rgba(0, 0, 0, .35);
   border: 0;
   border-radius: 999px;
-  padding: 8px 16px;
+  min-height: 44px;
+  padding: 8px 20px;
+  margin-bottom: env(safe-area-inset-bottom);
   cursor: pointer;
 }
 
@@ -158,6 +180,13 @@ a { color: inherit; text-decoration: none; }
 }
 .nav .nav__cta:hover { background: var(--verde-oscuro); }
 
+/* respuesta al tocar (en celular no hay hover) */
+.btn, .nav__cta, .nav__toggle, .intro__skip { transition: transform .1s ease, opacity .1s ease; }
+.btn:active, .nav__cta:active, .nav__toggle:active, .intro__skip:active { transform: scale(.96); opacity: .85; }
+.cta:active rect { fill: var(--crema); }
+.cta:active text { fill: var(--verde-cani); }
+.nav a:not(.nav__cta):active, .footer__links a:active { opacity: .6; }
+
 /* ==========================================================
    TIPOGRAFÍA
    Nickel Gothic: solo titulares cortos, siempre en mayúsculas
@@ -166,7 +195,7 @@ a { color: inherit; text-decoration: none; }
   font-family: var(--font-titular);
   font-weight: 400;
   text-transform: uppercase;
-  line-height: 1.08;
+  line-height: 1.16;
   font-size: clamp(56px, 11vw, 180px);
   margin-bottom: 40px;
 }
@@ -195,6 +224,7 @@ a { color: inherit; text-decoration: none; }
 .hero .doodles { position: absolute; inset: 0; width: 100%; height: 100%; }
 .hero__bottom {
   position: relative;
+  z-index: 1;
   width: 100%;
   display: flex;
   align-items: flex-end;
@@ -406,6 +436,19 @@ a { color: inherit; text-decoration: none; }
 }
 .btn--ghost { background: transparent; border-color: var(--crema); }
 
+/* Pantallas ultra anchas: el dibujo no crece más allá de la altura,
+   queda centrado y se funde con el fondo en los costados */
+@media (min-aspect-ratio: 2/1) {
+  .hero .doodles {
+    left: 50%;
+    right: auto;
+    width: 196svh;
+    transform: translateX(-50%);
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 7%, #000 93%, transparent);
+            mask-image: linear-gradient(to right, transparent, #000 7%, #000 93%, transparent);
+  }
+}
+
 /* ==========================================================
    PORTADA EN PANTALLAS VERTICALES / ANGOSTAS
    El dibujo se recorta a los costados, así que el texto y los
@@ -413,6 +456,15 @@ a { color: inherit; text-decoration: none; }
    ========================================================== */
 @media (max-aspect-ratio: 6/5) {
   .hero { height: 100svh; }
+  .hero::after {                   /* fondo oscuro para que los premios se lean sobre la vereda */
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 130px;
+    background: linear-gradient(to top, var(--verde-oscuro) 45%, transparent);
+  }
   .doodles .frame,
   .doodles .hero__title,
   .doodles .hero__subtitle,
@@ -455,6 +507,8 @@ a { color: inherit; text-decoration: none; }
     background: none;
     border: 1.5px solid currentColor;
     border-radius: 999px;
+    min-height: 44px;
+    min-width: 84px;
     padding: 7px 16px;
     cursor: pointer;
   }
@@ -484,7 +538,7 @@ a { color: inherit; text-decoration: none; }
 
   .awards { gap: 20px; }
   .awards li { font-size: 13px; }
-  .awards span { font-size: 11px; }
+  .awards span { font-size: 12px; opacity: 1; }
 
   /* números apilados */
   .stats { grid-template-columns: 1fr; }
@@ -497,6 +551,8 @@ a { color: inherit; text-decoration: none; }
   .grid--3 .card { aspect-ratio: 16 / 9; }   /* en una columna, tarjetas más bajas */
   .award { font-size: 20px; padding: 24px 20px; }
   .footer { flex-direction: column; align-items: flex-start; }
+  .footer__links { gap: 8px 24px; }
+  .footer__links a { padding: 11px 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -33,7 +33,13 @@
   const setMenu = open => {
     header.classList.toggle('is-open', open);
     toggle.setAttribute('aria-expanded', open);
+    toggle.textContent = open ? 'Cerrar' : 'Menú';
   };
+  const menuOpen = () => header.classList.contains('is-open');
+  // se cierra al tocar afuera, al scrollear o con Escape
+  document.addEventListener('click', e => { if (menuOpen() && !header.contains(e.target)) setMenu(false); });
+  window.addEventListener('scroll', () => { if (menuOpen()) setMenu(false); }, { passive: true });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && menuOpen()) setMenu(false); });
   toggle.addEventListener('click', () => setMenu(!header.classList.contains('is-open')));
   header.querySelectorAll('.nav a').forEach(a => a.addEventListener('click', () => setMenu(false)));
 
@@ -65,19 +71,35 @@
     draw();
   }
 
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  // la intro se muestra una sola vez por visita (agregar ?intro a la URL para verla de nuevo)
+  let seen = false;
+  try {
+    seen = sessionStorage.getItem('intro') === '1' && !location.search.includes('intro');
+    sessionStorage.setItem('intro', '1');
+  } catch (e) { /* sin almacenamiento: se muestra siempre */ }
+
+  if (seen || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
     finish();
     return;
   }
 
   intro.querySelector('.intro__skip').addEventListener('click', finish);
 
+  // espera las imágenes de la intro y las de la portada (máximo 4 s, para no trabar con mala conexión)
   const imgs = [...intro.querySelectorAll('img')];
   const ready = imgs.map(img =>
     img.complete ? Promise.resolve() : new Promise(r => { img.onload = img.onerror = r; })
   );
+  hero.querySelectorAll('.doodles image').forEach(image => {
+    ready.push(new Promise(r => {
+      const pre = new Image();
+      pre.onload = pre.onerror = r;
+      pre.src = image.getAttribute('href');
+    }));
+  });
+  const maxWait = new Promise(r => setTimeout(r, 4000));
 
-  Promise.all(ready).then(() => {
+  Promise.race([Promise.all(ready), maxWait]).then(() => {
     fitDoors();
     setTimeout(() => intro.classList.add('is-zooming'), 500);  // zoom a las puertas
     setTimeout(() => intro.classList.add('is-opening'), 1800); // se abren
@@ -89,7 +111,11 @@
 // Videos en loop: se reproducen solo cuando están a la vista
 (function () {
   const videos = document.querySelectorAll('.loop-video');
-  if (!videos.length || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  if (!videos.length) return;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    videos.forEach(v => { if (v.dataset.poster) v.poster = v.dataset.poster; });
+    return;
+  }
 
   const io = new IntersectionObserver(entries => {
     entries.forEach(({ target, isIntersecting }) => {
@@ -98,5 +124,17 @@
     });
   }, { threshold: 0.25 });
 
-  videos.forEach(v => io.observe(v));
+  // la imagen fija del video se pide recién cuando la sección está cerca
+  const posters = new IntersectionObserver((entries, obs) => {
+    entries.forEach(({ target, isIntersecting }) => {
+      if (!isIntersecting) return;
+      target.poster = target.dataset.poster;
+      obs.unobserve(target);
+    });
+  }, { rootMargin: '800px' });
+
+  videos.forEach(v => {
+    io.observe(v);
+    if (v.dataset.poster) posters.observe(v);
+  });
 })();
