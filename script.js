@@ -1,5 +1,16 @@
 // Intro: puesto cerrado → zoom a las puertas → se abren → detrás queda el interior dibujándose (inicio)
 (function () {
+  // al recargar, siempre se arranca desde la portada (no desde donde había quedado el scroll)
+  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+  if (location.hash) history.replaceState(null, '', location.pathname + location.search);
+  const toTop = () => {
+    document.documentElement.style.scrollBehavior = 'auto';
+    window.scrollTo(0, 0);
+    document.documentElement.style.scrollBehavior = '';
+  };
+  toTop();
+  window.addEventListener('load', toTop);
+
   const intro = document.getElementById('intro');
   const stage = intro.querySelector('.intro__stage');
   const header = document.querySelector('.header');
@@ -71,14 +82,7 @@
     draw();
   }
 
-  // la intro se muestra una sola vez por visita (agregar ?intro a la URL para verla de nuevo)
-  let seen = false;
-  try {
-    seen = sessionStorage.getItem('intro') === '1' && !location.search.includes('intro');
-    sessionStorage.setItem('intro', '1');
-  } catch (e) { /* sin almacenamiento: se muestra siempre */ }
-
-  if (seen || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
     finish();
     return;
   }
