@@ -1,15 +1,22 @@
 // Intro: puesto cerrado → zoom a las puertas → se abren → detrás queda el interior dibujándose (inicio)
 (function () {
+  if (!document.getElementById('intro')) return;   // páginas internas: no hay intro ni portada
+
   // al recargar, siempre se arranca desde la portada (no desde donde había quedado el scroll)
+  // excepción: si se llega desde otra página con un ancla (ej. index.html#activa), se va directo ahí sin intro
+  const nav = performance.getEntriesByType('navigation')[0];
+  const deepLink = !!location.hash && !(nav && nav.type === 'reload');
   if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
-  if (location.hash) history.replaceState(null, '', location.pathname + location.search);
+  if (location.hash && !deepLink) history.replaceState(null, '', location.pathname + location.search);
   const toTop = () => {
     document.documentElement.style.scrollBehavior = 'auto';
     window.scrollTo(0, 0);
     document.documentElement.style.scrollBehavior = '';
   };
-  toTop();
-  window.addEventListener('load', toTop);
+  if (!deepLink) {
+    toTop();
+    window.addEventListener('load', toTop);
+  }
 
   const intro = document.getElementById('intro');
   const stage = intro.querySelector('.intro__stage');
@@ -82,7 +89,7 @@
     draw();
   }
 
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  if (deepLink || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
     finish();
     return;
   }

@@ -359,6 +359,7 @@ a, button { -webkit-tap-highlight-color: transparent; }
 .card--media {
   position: relative;
   overflow: hidden;
+  isolation: isolate;              /* Safari: mantiene el recorte redondeado durante las animaciones */
   color: var(--crema);
   background: var(--verde-oscuro);
 }
@@ -369,6 +370,10 @@ a, button { -webkit-tap-highlight-color: transparent; }
   height: 100%;
   object-fit: cover;
 }
+.card--media .slides,
+.card--media video,
+.card--media::after { border-radius: inherit; }
+.card--media .slides { position: absolute; inset: 0; overflow: hidden; }
 .card--media::after {           /* degradé para que el texto se lea sobre el video */
   content: "";
   position: absolute;
@@ -376,6 +381,145 @@ a, button { -webkit-tap-highlight-color: transparent; }
   background: linear-gradient(to top, rgba(0, 0, 0, .55), transparent 45%);
 }
 .card--media span { position: relative; z-index: 1; }
+.section--green .card.card--media { color: var(--crema); }
+
+/* fotos que se alternan en loop con un fundido (3 fotos, 3 s cada una) */
+.slides img {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  animation: slide-fade 9s infinite;
+}
+.slides img:nth-child(2) { animation-delay: 3s; }
+.slides img:nth-child(3) { animation-delay: 6s; }
+/* variante de 4 fotos */
+.slides--4 img { animation-name: slide-fade-4; animation-duration: 12s; }
+.slides--4 img:nth-child(4) { animation-delay: 9s; }
+@keyframes slide-fade-4 {
+  0%, 100% { opacity: 0; }
+  6%, 25% { opacity: 1; }
+  31% { opacity: 0; }
+}
+.card small { font-size: 14px; font-weight: 500; margin-left: 8px; white-space: nowrap; }
+a.card--media:hover small { text-decoration: underline; text-underline-offset: 3px; }
+a.card--media:active { opacity: .85; }
+
+/* PÁGINAS INTERNAS: header fijo y sólido, galería de fotos */
+.header--static {
+  position: sticky;
+  background: var(--crema);
+  color: var(--verde-cani);
+  border-bottom-color: var(--verde-cani);
+}
+.gallery { columns: 3 280px; column-gap: 16px; }
+.gallery img,
+.gallery video {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin-bottom: 16px;
+  border-radius: 20px;
+  break-inside: avoid;
+  background: var(--crema-oscura);
+}
+
+/* CARRUSEL 3D (carousel.js agrega .is-carousel; --o es la distancia al centro) */
+.gallery.is-carousel {
+  position: relative;
+  columns: auto;
+  height: clamp(340px, 64vh, 620px);
+  margin: 0 calc(var(--gutter) * -1);
+  overflow: hidden;
+  perspective: 1400px;
+  touch-action: pan-y;
+  user-select: none;
+  --o: 0;
+  --abs: 0;
+}
+.gallery.is-carousel > img,
+.gallery.is-carousel > video {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: auto;
+  height: 84%;
+  aspect-ratio: 4 / 5;
+  margin: 0;
+  object-fit: cover;
+  cursor: pointer;
+  transform:
+    translate(-50%, -50%)
+    translateX(calc(var(--o) * 64%))
+    translateZ(calc(var(--abs) * -220px))
+    rotateY(calc(var(--o) * -24deg))
+    scale(calc(1 - var(--abs) * .14));
+  filter: brightness(calc(1 - var(--abs) * .28));
+}
+/* las transiciones se activan después del primer acomodo, para que no "vuelen" al cargar */
+.gallery.is-ready > img,
+.gallery.is-ready > video {
+  transition: transform .7s cubic-bezier(.3, .7, .2, 1), filter .7s ease, opacity .5s ease;
+}
+.gallery.is-carousel > .is-active { cursor: default; box-shadow: 0 24px 60px rgba(0, 0, 0, .28); }
+.gallery.is-carousel > .is-hidden { opacity: 0; pointer-events: none; }
+.carousel__btn {
+  position: absolute;
+  top: 50%;
+  z-index: 20;
+  width: 48px;
+  height: 48px;
+  transform: translateY(-50%);
+  border: 0;
+  border-radius: 50%;
+  background: var(--verde-cani);
+  color: var(--crema);
+  font: 700 26px/1 var(--font-texto);
+  padding-bottom: 4px;
+  cursor: pointer;
+}
+.carousel__btn:hover { background: var(--naranja); }
+.carousel__btn:active { transform: translateY(-50%) scale(.94); }
+.carousel__btn--prev { left: var(--gutter); }
+.carousel__btn--next { right: var(--gutter); }
+@media (prefers-reduced-motion: reduce) {
+  .gallery.is-carousel > img,
+  .gallery.is-carousel > video { transition: none; }
+}
+
+/* accesos a cada galería, pegados debajo del header */
+.subnav {
+  position: sticky;
+  top: 71px;
+  z-index: 5;
+  display: flex;
+  gap: 10px;
+  padding: 12px var(--gutter);
+  overflow-x: auto;
+  background: var(--crema);
+  border-bottom: 1px solid var(--crema-oscura);
+}
+.subnav a {
+  flex: none;
+  padding: 9px 18px;
+  border: 1.5px solid var(--verde-cani);
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 15px;
+}
+.subnav a:hover { background: var(--verde-cani); color: var(--crema); }
+.subnav ~ .section { padding-top: clamp(40px, 6vw, 72px); padding-bottom: 0; scroll-margin-top: 130px; }
+.subnav ~ .section:last-child { padding-bottom: clamp(64px, 10vw, 120px); }
+.subnav ~ .section .headline { font-size: clamp(40px, 7vw, 110px); margin-bottom: 28px; }
+
+@keyframes slide-fade {
+  0%, 100% { opacity: 0; }
+  8%, 33% { opacity: 1; }
+  41% { opacity: 0; }
+}
 
 .place {
   padding: 24px;
@@ -631,6 +775,25 @@ a, button { -webkit-tap-highlight-color: transparent; }
     border-bottom: 1px solid var(--verde-cani);
   }
   .header.is-open .nav { display: flex; }
+  .nav.nav--inline {               /* páginas internas: sin menú desplegable */
+    display: flex;
+    position: static;
+    flex-direction: row;
+    align-items: center;
+    gap: 16px;
+    padding: 0;
+    border: 0;
+  }
+  .nav.nav--inline a { padding: 8px 0; font-size: 16px; border: 0; }
+  .nav.nav--inline .nav__cta { margin: 0; padding: 8px 14px; font-size: 14px; }
+  .gallery:not(.is-carousel) { columns: 2 140px; column-gap: 10px; }
+  .gallery img { margin-bottom: 10px; border-radius: 14px; }
+  .gallery.is-carousel { height: clamp(320px, 58vh, 520px); }
+  .gallery.is-carousel > img,
+  .gallery.is-carousel > video { margin: 0; height: 80%; }
+  .carousel__btn { width: 44px; height: 44px; }
+  .carousel__btn--prev { left: 8px; }
+  .carousel__btn--next { right: 8px; }
   .nav a { padding: 14px 0; font-size: 18px; border-bottom: 1px solid var(--crema-oscura); }
   .nav .nav__cta { margin-top: 16px; padding: 14px 18px; text-align: center; border-bottom: 0; }
 
@@ -662,4 +825,6 @@ a, button { -webkit-tap-highlight-color: transparent; }
 
 @media (prefers-reduced-motion: reduce) {
   .intro { display: none; }
+  .slides img { animation: none; }
+  .slides img:first-child { opacity: 1; }
 }
