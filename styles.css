@@ -490,6 +490,9 @@ a.card--media:active { opacity: .85; }
   .gallery.is-carousel > video { transition: none; }
 }
 
+.gallery--single { columns: auto; }
+.gallery--single video { width: min(100%, 380px); margin: 0 auto; }
+
 /* accesos a cada galería, pegados debajo del header */
 .subnav {
   position: sticky;
@@ -541,6 +544,7 @@ a.card--media:active { opacity: .85; }
 
 /* ACTIVÁ TU MARCA */
 .lead { font-size: clamp(17px, 1.5vw, 22px); max-width: 34em; margin: -16px 0 32px; }
+.more { margin-top: 20px; }
 .brands { margin: 40px 0 32px; }
 .eyebrow { font-size: 13px; font-weight: 700; text-transform: uppercase; margin-bottom: 12px; }
 .pills { list-style: none; display: flex; flex-wrap: wrap; gap: 12px; }
@@ -786,7 +790,7 @@ a.card--media:active { opacity: .85; }
   }
   .nav.nav--inline a { padding: 8px 0; font-size: 16px; border: 0; }
   .nav.nav--inline .nav__cta { margin: 0; padding: 8px 14px; font-size: 14px; }
-  .gallery:not(.is-carousel) { columns: 2 140px; column-gap: 10px; }
+  .gallery:not(.is-carousel):not(.gallery--single) { columns: 2 140px; column-gap: 10px; }
   .gallery img { margin-bottom: 10px; border-radius: 14px; }
   .gallery.is-carousel { height: clamp(320px, 58vh, 520px); }
   .gallery.is-carousel > img,
