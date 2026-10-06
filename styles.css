@@ -337,6 +337,34 @@ a, button { -webkit-tap-highlight-color: transparent; }
 }
 .stat span { font-size: 16px; }
 
+/* números que aparecen de a uno a medida que el canillita los señala */
+.stats.is-staged .stat > * { opacity: 0; transform: translateY(16px); transition: opacity .45s ease, transform .45s ease; }
+.stats.is-staged .stat.is-in > * { opacity: 1; transform: none; }
+
+/* el canillita entero, parado en el borde de arriba de Puestos (zona verde), señalando hacia los números */
+.puestos__pointer {
+  position: absolute;
+  top: 6px;
+  left: 0;
+  height: 108px;
+  aspect-ratio: 426 / 700;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(var(--x, 0px), calc(var(--drop, 0) * var(--drop-dist, 150px)));
+  transition: transform .5s cubic-bezier(.4, 1.3, .5, 1), opacity .25s ease;
+}
+.puestos__pointer.is-in { opacity: calc(1 - var(--drop, 0)); }
+.puestos__pointer img { display: block; width: 100%; height: 100%; }
+
+/* títulos que suben desde abajo (script.js agrega .rise y los envuelve en .rise__inner) */
+.rise { overflow: hidden; padding-top: .06em; }
+.rise__inner {
+  display: block;
+  transform: translateY(115%);
+  transition: transform .8s cubic-bezier(.2, .8, .2, 1);
+}
+.rise.is-in .rise__inner { transform: none; }
+
 /* GRIDS */
 .grid { display: grid; gap: 16px; }
 .grid--2 { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
@@ -380,10 +408,13 @@ a, button { -webkit-tap-highlight-color: transparent; }
   inset: 0;
   background: linear-gradient(to top, rgba(0, 0, 0, .55), transparent 45%);
 }
-.card--media span { position: relative; z-index: 1; }
+.card--media::after { z-index: 3; }
+.card--media span { position: relative; z-index: 4; }
 .section--green .card.card--media { color: var(--crema); }
 
-/* fotos que se alternan en loop con un fundido (3 fotos, 3 s cada una) */
+/* fotos que se alternan en loop (3 fotos, 3 s cada una).
+   La foto que entra se funde por encima de la que sale, que sigue opaca debajo:
+   así nunca se ve el fondo entre una y otra. */
 .slides img {
   position: absolute;
   inset: 0;
@@ -394,16 +425,37 @@ a, button { -webkit-tap-highlight-color: transparent; }
   opacity: 0;
   animation: slide-fade 9s infinite;
 }
-.slides img:nth-child(2) { animation-delay: 3s; }
-.slides img:nth-child(3) { animation-delay: 6s; }
+.slides img:nth-child(2) { animation-delay: 2s; }
+.slides img:nth-child(3) { animation-delay: 5s; }
+@keyframes slide-fade {
+  0% { opacity: 0; z-index: 2; }
+  8% { opacity: 1; z-index: 2; }
+  33.3% { opacity: 1; z-index: 2; }
+  33.4%, 41.6% { opacity: 1; z-index: 1; }
+  41.7%, 100% { opacity: 0; z-index: 0; }
+}
+/* variante de 2 fotos */
+.slides--2 img { animation-name: slide-fade-2; animation-duration: 7s; }
+.slides--2 img:nth-child(2) { animation-delay: 2.5s; }
+@keyframes slide-fade-2 {
+  0% { opacity: 0; z-index: 2; }
+  10% { opacity: 1; z-index: 2; }
+  50% { opacity: 1; z-index: 2; }
+  50.1%, 60% { opacity: 1; z-index: 1; }
+  60.1%, 100% { opacity: 0; z-index: 0; }
+}
 /* variante de 4 fotos */
 .slides--4 img { animation-name: slide-fade-4; animation-duration: 12s; }
-.slides--4 img:nth-child(4) { animation-delay: 9s; }
+.slides--4 img:nth-child(4) { animation-delay: 8s; }
 @keyframes slide-fade-4 {
-  0%, 100% { opacity: 0; }
-  6%, 25% { opacity: 1; }
-  31% { opacity: 0; }
+  0% { opacity: 0; z-index: 2; }
+  6% { opacity: 1; z-index: 2; }
+  25% { opacity: 1; z-index: 2; }
+  25.1%, 31% { opacity: 1; z-index: 1; }
+  31.1%, 100% { opacity: 0; z-index: 0; }
 }
+/* la primera foto se ve desde el arranque (por eso todos los tiempos van corridos 1 s) */
+.slides img:first-child { animation-delay: -1s; }
 .card small { font-size: 14px; font-weight: 500; margin-left: 8px; white-space: nowrap; }
 a.card--media:hover small { text-decoration: underline; text-underline-offset: 3px; }
 a.card--media:active { opacity: .85; }
@@ -546,11 +598,6 @@ a.card--media:active { opacity: .85; }
 .subnav ~ .section .headline,
 .gallery-page .section .headline { font-size: clamp(40px, 7vw, 110px); margin-bottom: 28px; }
 
-@keyframes slide-fade {
-  0%, 100% { opacity: 0; }
-  8%, 33% { opacity: 1; }
-  41% { opacity: 0; }
-}
 
 .place {
   padding: 24px;
@@ -558,6 +605,49 @@ a.card--media:active { opacity: .85; }
   border-radius: 20px;
 }
 .place h3 { font-size: 22px; margin-bottom: 8px; }
+/* el canillita agachándose detrás del estante de la portada (--duck: 0 → 1 con el scroll) */
+.cani image { transform: translateY(calc(var(--duck, 0) * 1150px)); }
+
+/* puestos traídos desde la derecha por el canillita que tira de la soga (--pull: 0 → 1 con el scroll) */
+#puestos { position: relative; overflow: hidden; }
+.place { position: relative; }
+#puestos.is-pulled .place { transform: translateX(calc((1 - var(--pull, 0)) * 105vw)); will-change: transform; }
+.place__runner {
+  position: absolute;
+  right: calc(100% - 2px);        /* la soga termina justo en el borde del primer puesto */
+  top: 48px;
+  height: min(300px, 60%);
+  aspect-ratio: 760 / 681;
+  pointer-events: none;
+  transition: opacity .2s ease;
+}
+.place__runner img { display: block; width: 100%; height: 100%; }
+
+/* Centro de producción y Comunidad: tarjetas traídas desde un costado
+   (--pull: 0 → 1 con el scroll; --dir: -1 desde la izquierda, 1 desde la derecha) */
+.is-pulled-x { overflow: hidden; }
+.is-pulled-x .grid { position: relative; }
+.is-pulled-x .card,
+.grid__runner { transform: translateX(calc((1 - var(--pull, 0)) * 105vw * var(--dir, -1))); will-change: transform; }
+.grid__runner {
+  position: absolute;
+  pointer-events: none;
+  transition: opacity .2s ease;
+}
+.grid__runner.is-flipped img { transform: scaleX(-1); }
+.grid__runner img { display: block; width: 100%; height: 100%; }
+
+.place__media {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  margin-bottom: 20px;
+  overflow: hidden;
+  isolation: isolate;
+  border-radius: 12px;
+  background: var(--verde-oscuro);
+}
+.place__media .slides { position: absolute; inset: 0; }
+.place__media video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 
 .block + .block { margin-top: 56px; }
 
@@ -615,7 +705,7 @@ a.card--media:active { opacity: .85; }
 .about .headline { margin-bottom: 24px; }
 .founders {
   position: relative;
-  aspect-ratio: 20 / 7;
+  aspect-ratio: 3 / 2;
   border-radius: 20px;
   overflow: hidden;
   background: var(--crema-oscura);
@@ -625,7 +715,7 @@ a.card--media:active { opacity: .85; }
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(0, 0, 0, .6), transparent 55%);
+  background: linear-gradient(to top, rgba(0, 0, 0, .55), transparent 30%);
 }
 .founders figcaption {
   position: absolute;
@@ -847,11 +937,14 @@ a.card--media:active { opacity: .85; }
   .award { font-size: 20px; padding: 24px 20px; }
   .lead { margin-top: -8px; }
   .about { grid-template-columns: 1fr; margin-bottom: 40px; }
-  .founders { aspect-ratio: 16 / 9; }
+  .founders { aspect-ratio: 3 / 2; }
   .press-card__art { width: 88px; }
   .btn--lg { display: block; text-align: center; }
   .invest { padding: 40px 0 48px; }
   .invest .btn { width: 100%; text-align: center; }
+  #puestos { padding-top: 104px; }
+  .puestos__pointer { height: 92px; --drop-dist: 28px; }   /* baja poco, para no pisar el título */
+  .place__runner { top: 24px; height: 170px; }
   .footer { grid-template-columns: 1fr; padding-bottom: 56px; }
   .footer__nav { grid-template-columns: 1fr 1fr; }
   .footer__nav a { padding: 11px 0; }

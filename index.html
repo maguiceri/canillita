@@ -8,7 +8,7 @@
   <link rel="preload" as="font" type="font/woff2" href="fonts/anton.woff2" crossorigin>
   <link rel="preload" as="font" type="font/woff2" href="fonts/inter-tight.woff2" crossorigin>
   <link rel="preload" as="image" href="puestoAbierto.webp">
-  <link rel="stylesheet" href="styles.css?v=6">
+  <link rel="stylesheet" href="styles.css?v=23">
 </head>
 <body class="is-loading">
 
@@ -119,19 +119,37 @@
     <!-- PUESTOS -->
     <section class="section section--green" id="puestos">
       <h2 class="headline">Puestos</h2>
+      <!-- cada puesto pasa sus fotos en loop -->
       <div class="grid grid--3">
         <div class="place">
-          <h3>Puesto 1</h3>
+          <div class="place__media">
+            <div class="slides slides--2" aria-hidden="true">
+              <img src="img/puestos/barrancas1.webp" alt="" loading="lazy" style="object-position: 55% 50%">
+              <img src="img/puestos/barrancas2.webp" alt="" loading="lazy">
+            </div>
+          </div>
+          <h3>Barrancas</h3>
           <p>Dirección</p>
           <p>Horarios</p>
         </div>
         <div class="place">
-          <h3>Puesto 2</h3>
+          <div class="place__media">
+            <div class="slides" aria-hidden="true">
+              <img src="img/puestos/palacioPaz1.webp" alt="" loading="lazy">
+              <img src="img/puestos/palacioPaz2.webp" alt="" loading="lazy">
+              <img src="img/puestos/palacioPaz3.webp" alt="" loading="lazy">
+            </div>
+          </div>
+          <h3>Palacio Paz</h3>
           <p>Dirección</p>
           <p>Horarios</p>
         </div>
         <div class="place">
-          <h3>Puesto 3</h3>
+          <div class="place__media">
+            <video class="loop-video" src="videos/derechovideo1.mp4" data-poster="img/puestos/derecho1.webp"
+                   muted loop playsinline preload="none" aria-hidden="true"></video>
+          </div>
+          <h3>Derecho</h3>
           <p>Dirección</p>
           <p>Horarios</p>
         </div>
@@ -248,8 +266,8 @@
           <h3 class="subhead">Historia y concepto</h3>
           <p>Es mucho más que una cafetería, <strong>es un movimiento urbano</strong>.</p>
         </div>
-        <!-- TODO: reemplazar por la foto de los fundadores (<img> dentro del figure) -->
         <figure class="founders">
+          <img src="img/nosotros/co-founders.webp" alt="Lautaro, Gerónimo y Julián frente a un puesto Canillita" loading="lazy">
           <figcaption><strong>Lautaro, Gerónimo y Julián</strong>Co-founders</figcaption>
         </figure>
       </div>
@@ -329,6 +347,6 @@
     </nav>
   </footer>
 
-  <script src="script.js?v=6"></script>
+  <script src="script.js?v=23"></script>
 </body>
 </html>

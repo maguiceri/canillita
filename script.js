@@ -31,7 +31,12 @@
   });
 
   // header transparente sobre el hero, crema al scrollear
-  const onScroll = () => header.classList.toggle('is-solid', window.scrollY > hero.offsetHeight - 80);
+  const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const onScroll = () => {
+    header.classList.toggle('is-solid', window.scrollY > hero.offsetHeight - 80);
+    // al scrollear, el canillita se agacha detrás del estante y "sale" del puesto
+    if (!calm) hero.style.setProperty('--duck', Math.min(1, window.scrollY / (hero.offsetHeight * 0.45)).toFixed(3));
+  };
   window.addEventListener('scroll', onScroll, { passive: true });
   onScroll();
 
@@ -147,5 +152,156 @@
   videos.forEach(v => {
     io.observe(v);
     if (v.dataset.poster) posters.observe(v);
+  });
+})();
+
+// Números y Puestos: una sola secuencia que sigue al scroll (y vuelve atrás si subís).
+//   1. El canillita, parado en el borde verde debajo de los números, los va señalando y aparecen de a uno.
+//   2. Baja y desaparece.
+//   3. Entra corriendo con la soga y trae los puestos desde la derecha.
+(function () {
+  const strip = document.querySelector('.stats');
+  const section = document.querySelector('#puestos');
+  if (!strip || !section) return;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  const stats = [...strip.querySelectorAll('.stat')];
+  const places = [...section.querySelectorAll('.place')];
+  const clamp = v => Math.max(0, Math.min(1, v));
+
+  const pointer = document.createElement('div');
+  pointer.className = 'puestos__pointer';
+  pointer.setAttribute('aria-hidden', 'true');
+  pointer.innerHTML = '<img src="canillita-entero.webp" alt="">';
+  section.prepend(pointer);
+
+  const runner = document.createElement('div');
+  runner.className = 'place__runner';
+  runner.setAttribute('aria-hidden', 'true');
+  runner.innerHTML = '<img src="canillita-carrusel.webp" alt="">';
+  places[0].prepend(runner);
+
+  strip.classList.add('is-staged');
+  section.classList.add('is-pulled');
+  const grid = places[0].parentElement;
+
+  let ticking = false;
+  function update() {
+    ticking = false;
+    const vh = window.innerHeight;
+    const stripRect = strip.getBoundingClientRect();
+    const oneRow = stats[stats.length - 1].offsetTop === stats[0].offsetTop;
+
+    // 1. señalar: avanza mientras la tira de números sube por la pantalla
+    // (empieza cuando el canillita, que está justo debajo de la tira, ya se ve entero)
+    const a = clamp((vh - 130 - stripRect.bottom) / (vh * 0.25));
+    let current = -1;
+    stats.forEach((stat, i) => {
+      const on = a > 0.05 + i * 0.25;
+      stat.classList.toggle('is-in', on);
+      if (on) current = i;
+    });
+    const target = stats[Math.max(0, current)];
+    const x = oneRow
+      ? target.offsetLeft + parseFloat(getComputedStyle(target).paddingLeft) + 90   // debajo del número
+      : parseFloat(getComputedStyle(target).paddingLeft);                            // celular: fijo a la izquierda
+    pointer.style.setProperty('--x', `${x}px`);
+
+    // 2. bajar: cuando los puestos empiezan a asomar
+    const gridTop = grid.getBoundingClientRect().top;
+    const firstTop = gridTop + places[0].offsetTop - grid.offsetTop;
+    const drop = clamp((vh * 1.02 - firstTop) / (vh * 0.2));
+    pointer.style.setProperty('--drop', drop.toFixed(3));
+    pointer.classList.toggle('is-in', stripRect.bottom < vh - 20 && drop < 1);
+
+    // 3. traer los puestos (posición original de cada uno, sin contar el corrimiento)
+    places.forEach((place, i) => {
+      const top = gridTop + place.offsetTop - grid.offsetTop;
+      const t = clamp((vh * 0.82 - top) / (vh * 0.5));
+      place.style.setProperty('--pull', (1 - Math.pow(1 - t, 2)).toFixed(4));
+      if (i === 0) runner.style.opacity = t > 0.94 || t === 0 ? 0 : 1;
+    });
+  }
+  const request = () => { if (!ticking) { ticking = true; requestAnimationFrame(update); } };
+  window.addEventListener('scroll', request, { passive: true });
+  window.addEventListener('resize', request);
+  update();
+})();
+
+// Centro de producción propio y Comunidad: un canillita corre tirando de la soga y trae las tarjetas.
+// Cada sección entra del lado contrario a la de arriba (Puestos: derecha, Producción: izquierda,
+// Comunidad: derecha). Sigue al scroll y vuelve atrás si subís.
+// Los dos dibujos corren hacia la derecha; para traer desde la derecha se espejan.
+[
+  ['#productos', 'canillita-carrusel-cookie.webp', 760 / 650, 'left'],
+  ['#comunidad', 'canillita-carrusel-comunidad.webp', 760 / 633, 'right'],
+].forEach(function ([selector, image, ratio, from]) {
+  const section = document.querySelector(selector);
+  if (!section) return;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const grid = section.querySelector('.grid');
+  const cards = [...grid.children];
+  const clamp = v => Math.max(0, Math.min(1, v));
+
+  const runner = document.createElement('div');
+  runner.className = 'grid__runner';
+  runner.setAttribute('aria-hidden', 'true');
+  runner.innerHTML = `<img src="${image}" alt="">`;
+  if (from === 'right') runner.classList.add('is-flipped');
+  grid.appendChild(runner);
+  section.classList.add('is-pulled-x');
+  section.style.setProperty('--dir', from === 'right' ? 1 : -1);
+
+  let ticking = false;
+  function update() {
+    ticking = false;
+    const vh = window.innerHeight;
+    const gridTop = grid.getBoundingClientRect().top;
+    // el canillita va adelante de la primera fila: agarrado de la última tarjeta si vienen
+    // desde la izquierda, o de la primera si vienen desde la derecha
+    const firstRow = cards.filter(card => card.offsetTop === cards[0].offsetTop);
+    const lead = from === 'right' ? firstRow[0] : firstRow[firstRow.length - 1];
+    cards.forEach(card => {
+      const top = gridTop + card.offsetTop;
+      const t = clamp((vh * 0.82 - top) / (vh * 0.5));
+      const pull = (1 - Math.pow(1 - t, 2)).toFixed(4);
+      card.style.setProperty('--pull', pull);
+      if (card === lead) {
+        const h = Math.min(300, card.offsetHeight * 0.75);
+        runner.style.height = `${h}px`;
+        runner.style.width = `${h * ratio}px`;
+        runner.style.left = from === 'right'
+          ? `${card.offsetLeft - h * ratio + 2}px`
+          : `${card.offsetLeft + card.offsetWidth - 2}px`;
+        runner.style.top = `${card.offsetTop + (card.offsetHeight - h) / 2}px`;
+        runner.style.setProperty('--pull', pull);
+        runner.style.opacity = t > 0.94 || t === 0 ? 0 : 1;
+      }
+    });
+  }
+  const request = () => { if (!ticking) { ticking = true; requestAnimationFrame(update); } };
+  window.addEventListener('scroll', request, { passive: true });
+  window.addEventListener('resize', request);
+  update();
+});
+
+// Títulos: aparecen subiendo desde abajo cuando entran en pantalla
+(function () {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const titles = document.querySelectorAll('.headline, .subhead, .invest h2');
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      e.target.classList.add('is-in');
+      io.unobserve(e.target);
+    });
+  }, { threshold: 0.2 });
+  titles.forEach(title => {
+    const inner = document.createElement('span');
+    inner.className = 'rise__inner';
+    while (title.firstChild) inner.appendChild(title.firstChild);
+    title.appendChild(inner);
+    title.classList.add('rise');
+    io.observe(title);
   });
 })();
