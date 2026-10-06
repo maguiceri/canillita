@@ -2,12 +2,31 @@
 // Convierte cada .gallery en carrusel; sin JavaScript queda la grilla de fotos.
 (function () {
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const INTERVAL = 3000;
+  const INTERVAL = 3000;        // tiempo de cada foto
+  const VIDEO_INTERVAL = 7000;  // los videos se quedan más tiempo al frente
 
   document.querySelectorAll('.gallery').forEach(gallery => {
+    if (gallery.children.length < 2) return;
+
+    // cada video va dentro de un marco con el tamaño de la tarjeta: el marco es el que se mueve
+    // y recorta, así el video nunca muestra bordes mientras carga o cambia de tamaño
+    [...gallery.children].forEach(el => {
+      if (el.tagName !== 'VIDEO') return;
+      const frame = document.createElement('div');
+      frame.className = 'carousel__frame';
+      // la imagen fija pasa a ser el fondo del marco: el video queda transparente hasta tener su primer cuadro
+      const poster = el.getAttribute('poster') || el.dataset.poster;
+      if (poster) frame.style.backgroundImage = `url("${poster}")`;
+      el.removeAttribute('poster');
+      delete el.dataset.poster;
+      el.removeAttribute('width');
+      el.removeAttribute('height');
+      el.replaceWith(frame);
+      frame.appendChild(el);
+    });
     const items = [...gallery.children];
     const n = items.length;
-    if (n < 2) return;
+    const videoOf = item => (item.tagName === 'DIV' ? item.querySelector('video') : null);
 
     let active = 0;
     let timer = null;
@@ -31,17 +50,28 @@
         item.classList.toggle('is-active', o === 0);
         item.classList.toggle('is-hidden', abs > 2);
       });
+      syncVideos();
+    }
+
+    // videos propios del carrusel (sin .loop-video): solo se reproduce el del centro
+    const ownVideos = items.map(videoOf).filter(v => v && !v.classList.contains('loop-video'));
+    function syncVideos() {
+      ownVideos.forEach(v => {
+        if (v === videoOf(items[active]) && visible && !reduced) v.play().catch(() => {});
+        else v.pause();
+      });
     }
 
     const go = i => { active = (i + n) % n; render(); };
+    const delay = () => (videoOf(items[active]) ? VIDEO_INTERVAL : INTERVAL);
     const next = () => go(active + 1);
     const prev = () => go(active - 1);
 
     function play() {
       stop();
-      if (!reduced && visible && !hovered && !document.hidden) timer = setInterval(next, INTERVAL);
+      if (!reduced && visible && !hovered && !document.hidden) timer = setTimeout(() => { next(); play(); }, delay());
     }
-    function stop() { clearInterval(timer); timer = null; }
+    function stop() { clearTimeout(timer); timer = null; }
 
     // flechas
     [['prev', '‹', 'Foto anterior', prev], ['next', '›', 'Foto siguiente', next]].forEach(([dir, label, text, fn]) => {
@@ -71,7 +101,7 @@
     gallery.addEventListener('mouseenter', () => { hovered = true; stop(); });
     gallery.addEventListener('mouseleave', () => { hovered = false; play(); });
     document.addEventListener('visibilitychange', play);
-    new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; play(); }, { threshold: 0.3 }).observe(gallery);
+    new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; syncVideos(); play(); }, { threshold: 0.3 }).observe(gallery);
 
     render();
     requestAnimationFrame(() => requestAnimationFrame(() => gallery.classList.add('is-ready')));

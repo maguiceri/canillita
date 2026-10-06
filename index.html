@@ -8,7 +8,7 @@
   <link rel="preload" as="font" type="font/woff2" href="fonts/anton.woff2" crossorigin>
   <link rel="preload" as="font" type="font/woff2" href="fonts/inter-tight.woff2" crossorigin>
   <link rel="preload" as="image" href="puestoAbierto.webp">
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=6">
 </head>
 <body class="is-loading">
 
@@ -158,10 +158,32 @@
     <section class="section section--dark" id="comunidad">
       <h2 class="headline">Comunidad</h2>
       <div class="grid grid--3">
-        <div class="card card--dark">Eventos</div>
-        <div class="card card--dark">Artistas emergentes</div>
-        <div class="card card--dark">Colaboraciones</div>
+        <a class="card card--dark card--media" href="comunidad.html#eventos">
+          <div class="slides" aria-hidden="true">
+            <img src="img/eventos/eventos12.webp" alt="" loading="lazy">
+            <img src="img/eventos/eventos14.webp" alt="" loading="lazy">
+            <img src="img/eventos/eventos2.webp" alt="" loading="lazy">
+          </div>
+          <span>Eventos</span>
+        </a>
+        <a class="card card--dark card--media" href="comunidad.html#artistas">
+          <div class="slides" aria-hidden="true">
+            <img src="img/artistas/artistas2.webp" alt="" loading="lazy" style="object-position: 42% 50%">
+            <img src="img/artistas/artistas4.webp" alt="" loading="lazy">
+            <img src="img/artistas/artistas1.webp" alt="" loading="lazy" style="object-position: 45% 50%">
+          </div>
+          <span>Artistas emergentes</span>
+        </a>
+        <a class="card card--dark card--media" href="comunidad.html#colaboraciones">
+          <div class="slides" aria-hidden="true">
+            <img src="img/colabs/colabs3.webp" alt="" loading="lazy" style="object-position: 62% 50%">
+            <img src="img/colabs/colabs6.webp" alt="" loading="lazy">
+            <img src="img/colabs/colabs2.webp" alt="" loading="lazy" style="object-position: 35% 50%">
+          </div>
+          <span>Colaboraciones</span>
+        </a>
       </div>
+      <a class="btn btn--ghost more" href="comunidad.html">Ver más ›</a>
     </section>
 
     <!-- ACTIVÁ TU MARCA -->
@@ -307,6 +329,6 @@
     </nav>
   </footer>
 
-  <script src="script.js"></script>
+  <script src="script.js?v=6"></script>
 </body>
 </html>
