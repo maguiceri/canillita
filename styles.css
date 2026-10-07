@@ -651,6 +651,14 @@ a.card--media:active { opacity: .85; }
   transition: opacity .2s ease;
 }
 .grid__runner.is-flipped img { transform: scaleX(-1); }
+
+/* el canillita va dando saltitos mientras corre (translate/rotate sueltos: no pisan el transform) */
+.grid__runner img,
+.puestos__cani.is-running .puestos__cani-run { animation: runner-bob .32s ease-in-out infinite alternate; }
+@keyframes runner-bob {
+  from { translate: 0 6px; rotate: 3deg; }
+  to { translate: 0 -10px; rotate: -4deg; }
+}
 .grid__runner img { display: block; width: 100%; height: 100%; }
 
 .place__media {
@@ -1012,6 +1020,7 @@ a.card--media:active { opacity: .85; }
 
 @media (prefers-reduced-motion: reduce) {
   .intro { display: none; }
+  .grid__runner img, .puestos__cani-run { animation: none !important; }
   .stats__track { animation: none; }
   .stats.is-marquee { overflow-x: auto; }
   .slides img { animation: none; }

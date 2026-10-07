@@ -193,6 +193,7 @@
   const clamp = v => Math.max(0, Math.min(1, v));
   const lerp = (a, b, t) => a + (b - a) * t;
   const smooth = t => t * t * (3 - 2 * t);
+  const back = t => (t < 0.8 ? t / 0.8 : 1 + 0.035 * Math.sin(Math.PI * (t - 0.8) / 0.2));   // corre parejo (así el canillita se ve todo el trayecto), se pasa un poco y vuelve
   const POINT_RATIO = 426 / 700;   // canillita-entero.webp
   const RUN_RATIO = 760 / 681;     // canillita-carrusel.webp
 
@@ -239,10 +240,11 @@
   function render(m) {
     const a = clamp(P);
     const e = smooth(clamp(P - 1));
-    const pull = smooth(clamp(P - 2));
+    const pull = back(clamp(P - 2));
 
     // 1. números (en celular rotan solos en una barra, no dependen del scroll)
-    if (!mobile) [0.05, 0.4, 0.75].forEach((at, i) => { if (stats[i]) stats[i].classList.toggle('is-in', a > at); });
+    // una vez que aparecen, quedan (no se ocultan al volver a subir)
+    if (!mobile) [0.05, 0.4, 0.75].forEach((at, i) => { if (stats[i] && a > at) stats[i].classList.add('is-in'); });
     const wA = m.hA * POINT_RATIO;
     const pad = parseFloat(getComputedStyle(stats[0]).paddingLeft);
     const xs = stats.map(stat => (m.oneRow ? stat.offsetLeft + pad + 90 : pad) + wA / 2);
@@ -266,7 +268,7 @@
     });
 
     // el canillita: de la posición de señalar a la de correr, agarrado del primer puesto
-    const hR = m.oneRow ? Math.min(300, first.offsetHeight * 0.6) : 170;
+    const hR = m.oneRow ? Math.min(340, first.offsetHeight * 0.65) : 200;
     const wR = hR * RUN_RATIO;
     const cxH = first.offsetLeft + (1 - pull) * D - wR / 2 + 2;
     const cyH = first.offsetTop + (m.oneRow ? 48 : 24) + hR / 2;
@@ -275,7 +277,8 @@
     const swap = clamp((e - 0.25) / 0.5);          // cambio de pose a mitad de la bajada
     pointImg.style.opacity = 1 - swap;
     runImg.style.opacity = swap;
-    cani.classList.toggle('is-in', a > 0.01 && pull < 0.95);
+    cani.classList.toggle('is-in', a > 0.01 && P < 2.93);
+    cani.classList.toggle('is-running', P > 1.5);
   }
 
   function step(now) {
@@ -287,7 +290,7 @@
     // velocidad máxima por etapa (unidades de progreso por segundo); si quedó muy atrás, se apura
     const d = m.target - P;
     if (Math.abs(d) > 0.0005) {
-      let speed = P < 1 ? 0.85 : P < 2 ? 1.6 : 0.8;
+      let speed = P < 1 ? 0.85 : P < 2 ? 1.6 : 0.48;
       if (Math.abs(d) > 2) speed *= 1.6;
       P += Math.sign(d) * Math.min(Math.abs(d), speed * dt);
       moving = true;
@@ -337,7 +340,7 @@
   grid.dataset.pullBox = '';
   cards.forEach(card => { card.dataset.pull = ''; });
   const clamp = v => Math.max(0, Math.min(1, v));
-  const smooth = t => t * t * (3 - 2 * t);
+  const back = t => (t < 0.8 ? t / 0.8 : 1 + 0.035 * Math.sin(Math.PI * (t - 0.8) / 0.2));   // corre parejo (así el canillita se ve todo el trayecto), se pasa un poco y vuelve
 
   const runner = document.createElement('div');
   runner.className = 'grid__runner';
@@ -359,10 +362,10 @@
     const firstRow = cards.filter(card => card.offsetTop === cards[0].offsetTop);
     const lead = from === 'right' ? firstRow[0] : firstRow[firstRow.length - 1];
     cards.forEach((card, i) => {
-      const pull = smooth(state[i]).toFixed(4);
+      const pull = back(state[i]).toFixed(4);
       card.style.setProperty('--pull', pull);
       if (card !== lead) return;
-      const h = Math.min(mobile ? 180 : 300, card.offsetHeight * 0.75);
+      const h = Math.min(mobile ? 210 : 340, card.offsetHeight * 0.85);
       runner.style.height = `${h}px`;
       runner.style.width = `${h * ratio}px`;
       runner.style.left = from === 'right'
@@ -385,7 +388,7 @@
       if (mobile && gridTop + card.offsetTop < vh * 0.75) done = true;
       const target = mobile ? (done ? 1 : 0) : clamp((vh * 0.9 - (gridTop + card.offsetTop)) / (vh * 0.55));
       const d = target - state[i];
-      if (Math.abs(d) > 0.0005) { state[i] += Math.sign(d) * Math.min(Math.abs(d), 0.8 * dt); moving = true; }
+      if (Math.abs(d) > 0.0005) { state[i] += Math.sign(d) * Math.min(Math.abs(d), 0.48 * dt); moving = true; }
     });
     render();
     if (moving) requestAnimationFrame(step);
