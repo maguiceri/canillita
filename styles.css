@@ -338,32 +338,56 @@ a, button { -webkit-tap-highlight-color: transparent; }
 .stat span { font-size: 16px; }
 
 /* números que aparecen de a uno a medida que el canillita los señala */
-.stats.is-staged .stat > * { opacity: 0; transform: translateY(16px); transition: opacity .45s ease, transform .45s ease; }
+.stats.is-staged .stat > * {
+  opacity: 0;
+  transform: translateY(36px) scale(.92);
+  transform-origin: left bottom;
+  transition: opacity .4s ease, transform .55s cubic-bezier(.3, 1.5, .5, 1);
+}
 .stats.is-staged .stat.is-in > * { opacity: 1; transform: none; }
 
-/* el canillita entero, parado en el borde de arriba de Puestos (zona verde), señalando hacia los números */
-.puestos__pointer {
+/* el canillita de la escena Números → Puestos: un solo elemento con dos poses que se funden.
+   script.js lo mueve (transform) y le cambia el alto (--h); el punto de anclaje es su centro. */
+.puestos__cani {
   position: absolute;
-  top: 6px;
   left: 0;
-  height: 108px;
-  aspect-ratio: 426 / 700;
+  top: 0;
+  z-index: 2;
+  width: 0;
+  height: 0;
   pointer-events: none;
   opacity: 0;
-  transform: translate(var(--x, 0px), calc(var(--drop, 0) * var(--drop-dist, 150px)));
-  transition: transform .5s cubic-bezier(.4, 1.3, .5, 1), opacity .25s ease;
+  transition: opacity .25s ease;
+  will-change: transform;
 }
-.puestos__pointer.is-in { opacity: calc(1 - var(--drop, 0)); }
-.puestos__pointer img { display: block; width: 100%; height: 100%; }
+.puestos__cani.is-in { opacity: 1; }
+.puestos__cani img {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: var(--h, 150px);
+  width: auto;
+  max-width: none;
+  transform: translate(-50%, -50%);
+}
+.puestos__cani-run { opacity: 0; }
+@media (min-width: 761px) { #puestos { padding-top: 190px; } }   /* lugar en el verde para el canillita */
 
-/* títulos que suben desde abajo (script.js agrega .rise y los envuelve en .rise__inner) */
-.rise { overflow: hidden; padding-top: .06em; }
+/* títulos que suben desde abajo, palabra por palabra (script.js arma .rise__word > .rise__inner) */
+.rise__word {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: top;
+  padding-top: .12em;              /* lugar para las tildes de las mayúsculas */
+  margin-top: -.12em;
+}
 .rise__inner {
-  display: block;
-  transform: translateY(115%);
-  transition: transform .8s cubic-bezier(.2, .8, .2, 1);
+  display: inline-block;
+  transform: translateY(110%);
+  transition: transform .9s cubic-bezier(.2, .8, .2, 1);
 }
 .rise.is-in .rise__inner { transform: none; }
+.rise:not(.is-in) .rise__inner { transition-duration: 0s; transition-delay: 0s !important; }
 
 /* GRIDS */
 .grid { display: grid; gap: 16px; }
@@ -608,29 +632,21 @@ a.card--media:active { opacity: .85; }
 /* el canillita agachándose detrás del estante de la portada (--duck: 0 → 1 con el scroll) */
 .cani image { transform: translateY(calc(var(--duck, 0) * 1150px)); }
 
-/* puestos traídos desde la derecha por el canillita que tira de la soga (--pull: 0 → 1 con el scroll) */
+/* puestos traídos desde la derecha (--tx lo calcula script.js) */
 #puestos { position: relative; overflow: hidden; }
 .place { position: relative; }
-#puestos.is-pulled .place { transform: translateX(calc((1 - var(--pull, 0)) * 105vw)); will-change: transform; }
-.place__runner {
-  position: absolute;
-  right: calc(100% - 2px);        /* la soga termina justo en el borde del primer puesto */
-  top: 48px;
-  height: min(300px, 60%);
-  aspect-ratio: 760 / 681;
-  pointer-events: none;
-  transition: opacity .2s ease;
-}
-.place__runner img { display: block; width: 100%; height: 100%; }
+#puestos.is-pulled [data-tx] { transform: translateX(var(--tx, 0px)); will-change: transform; }
 
 /* Centro de producción y Comunidad: tarjetas traídas desde un costado
    (--pull: 0 → 1 con el scroll; --dir: -1 desde la izquierda, 1 desde la derecha) */
 .is-pulled-x { overflow: hidden; }
-.is-pulled-x .grid { position: relative; }
-.is-pulled-x .card,
+.is-pulled-x[data-pull-box],
+.is-pulled-x [data-pull-box] { position: relative; }
+.is-pulled-x [data-pull],
 .grid__runner { transform: translateX(calc((1 - var(--pull, 0)) * 105vw * var(--dir, -1))); will-change: transform; }
 .grid__runner {
   position: absolute;
+  z-index: 2;
   pointer-events: none;
   transition: opacity .2s ease;
 }
@@ -943,15 +959,60 @@ a.card--media:active { opacity: .85; }
   .invest { padding: 40px 0 48px; }
   .invest .btn { width: 100%; text-align: center; }
   #puestos { padding-top: 104px; }
-  .puestos__pointer { height: 92px; --drop-dist: 28px; }   /* baja poco, para no pisar el título */
-  .place__runner { top: 24px; height: 170px; }
+  /* números: una sola barra que va rotando los tres datos */
+  .stats { display: block; position: relative; height: 112px; overflow: hidden; }
+  .stat {
+    position: absolute;
+    inset: 0;
+    justify-content: center;
+    padding: 0 var(--gutter);
+    opacity: 0;
+    animation: stat-cycle 9s infinite;
+  }
+  .stat + .stat { border-top: 0; }
+  .stat:nth-child(2) { animation-delay: 3s; }
+  .stat:nth-child(3) { animation-delay: 6s; }
+  .stat strong { font-size: 52px; }
+
+  /* tarjetas en una sola fila, tipo carrusel: se deslizan con el dedo y la siguiente asoma */
+  #puestos .grid,
+  #productos .grid,
+  #comunidad .grid,
+  #activa .grid {
+    display: flex;
+    gap: 12px;
+    margin: 0 calc(var(--gutter) * -1);
+    padding: 0 var(--gutter);
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding-left: var(--gutter);
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  #puestos .grid::-webkit-scrollbar,
+  #productos .grid::-webkit-scrollbar,
+  #comunidad .grid::-webkit-scrollbar,
+  #activa .grid::-webkit-scrollbar { display: none; }
+  #puestos .grid > *,
+  #productos .grid > *,
+  #comunidad .grid > *,
+  #activa .grid > * { flex: 0 0 78%; scroll-snap-align: start; }
+  #comunidad .grid .card { aspect-ratio: 4 / 5; }
   .footer { grid-template-columns: 1fr; padding-bottom: 56px; }
   .footer__nav { grid-template-columns: 1fr 1fr; }
   .footer__nav a { padding: 11px 0; }
 }
 
+@keyframes stat-cycle {
+  0% { opacity: 0; transform: translateY(18px); }
+  5%, 30% { opacity: 1; transform: none; }
+  35%, 100% { opacity: 0; transform: translateY(-18px); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .intro { display: none; }
+  .stat { animation: none; }
+  .stat:first-child { opacity: 1; }
   .slides img { animation: none; }
   .slides img:first-child { opacity: 1; }
 }

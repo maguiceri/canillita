@@ -155,10 +155,12 @@
   });
 })();
 
-// Números y Puestos: una sola secuencia que sigue al scroll (y vuelve atrás si subís).
-//   1. El canillita, parado en el borde verde debajo de los números, los va señalando y aparecen de a uno.
-//   2. Baja y desaparece.
-//   3. Entra corriendo con la soga y trae los puestos desde la derecha.
+// Números y Puestos: una sola escena con un único canillita.
+//   1. Parado en el verde, debajo de los números, los señala de a uno y van apareciendo.
+//   2. Baja hasta la fila de puestos mientras cambia de pose (de señalar a correr con la soga).
+//   3. Corre hacia la izquierda y trae los puestos desde la derecha.
+// La escena sigue al scroll (y vuelve atrás si subís), pero avanza con una velocidad máxima:
+// aunque scrollees rápido, cada paso se llega a ver.
 (function () {
   const strip = document.querySelector('.stats');
   const section = document.querySelector('#puestos');
@@ -166,82 +168,150 @@
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
   const stats = [...strip.querySelectorAll('.stat')];
-  const places = [...section.querySelectorAll('.place')];
+  // celular: los puestos van en un carrusel de una fila, así que se trae la fila entera
+  const mobile = window.matchMedia('(max-width: 760px)').matches;
+  const places = mobile ? [section.querySelector('.grid')] : [...section.querySelectorAll('.place')];
+  places.forEach(place => { place.dataset.tx = ''; });
   const clamp = v => Math.max(0, Math.min(1, v));
+  const lerp = (a, b, t) => a + (b - a) * t;
+  const smooth = t => t * t * (3 - 2 * t);
+  const POINT_RATIO = 426 / 700;   // canillita-entero.webp
+  const RUN_RATIO = 760 / 681;     // canillita-carrusel.webp
 
-  const pointer = document.createElement('div');
-  pointer.className = 'puestos__pointer';
-  pointer.setAttribute('aria-hidden', 'true');
-  pointer.innerHTML = '<img src="canillita-entero.webp" alt="">';
-  section.prepend(pointer);
+  const cani = document.createElement('div');
+  cani.className = 'puestos__cani';
+  cani.setAttribute('aria-hidden', 'true');
+  cani.innerHTML = '<img class="puestos__cani-point" src="canillita-entero.webp" alt="">' +
+                   '<img class="puestos__cani-run" src="canillita-carrusel.webp" alt="">';
+  section.prepend(cani);
+  const [pointImg, runImg] = cani.children;
 
-  const runner = document.createElement('div');
-  runner.className = 'place__runner';
-  runner.setAttribute('aria-hidden', 'true');
-  runner.innerHTML = '<img src="canillita-carrusel.webp" alt="">';
-  places[0].prepend(runner);
-
-  strip.classList.add('is-staged');
+  if (!mobile) strip.classList.add('is-staged');
   section.classList.add('is-pulled');
-  const grid = places[0].parentElement;
 
-  let ticking = false;
-  function update() {
-    ticking = false;
+  // progreso de la escena: 0–1 señalar, 1–2 bajar y cambiar de pose, 2–3 traer los puestos
+  let P = 0;
+  const rowPull = places.map(() => 0);   // puestos de otras filas (celular): cada uno entra al llegar a él
+  let running = false;
+  let last = 0;
+
+  function measure() {
     const vh = window.innerHeight;
-    const stripRect = strip.getBoundingClientRect();
-    const oneRow = stats[stats.length - 1].offsetTop === stats[0].offsetTop;
-
-    // 1. señalar: avanza mientras la tira de números sube por la pantalla
-    // (empieza cuando el canillita, que está justo debajo de la tira, ya se ve entero)
-    const a = clamp((vh - 130 - stripRect.bottom) / (vh * 0.25));
-    let current = -1;
-    stats.forEach((stat, i) => {
-      const on = a > 0.05 + i * 0.25;
-      stat.classList.toggle('is-in', on);
-      if (on) current = i;
-    });
-    const target = stats[Math.max(0, current)];
-    const x = oneRow
-      ? target.offsetLeft + parseFloat(getComputedStyle(target).paddingLeft) + 90   // debajo del número
-      : parseFloat(getComputedStyle(target).paddingLeft);                            // celular: fijo a la izquierda
-    pointer.style.setProperty('--x', `${x}px`);
-
-    // 2. bajar: cuando los puestos empiezan a asomar
-    const gridTop = grid.getBoundingClientRect().top;
-    const firstTop = gridTop + places[0].offsetTop - grid.offsetTop;
-    const drop = clamp((vh * 1.02 - firstTop) / (vh * 0.2));
-    pointer.style.setProperty('--drop', drop.toFixed(3));
-    pointer.classList.toggle('is-in', stripRect.bottom < vh - 20 && drop < 1);
-
-    // 3. traer los puestos (posición original de cada uno, sin contar el corrimiento)
-    places.forEach((place, i) => {
-      const top = gridTop + place.offsetTop - grid.offsetTop;
-      const t = clamp((vh * 0.82 - top) / (vh * 0.5));
-      place.style.setProperty('--pull', (1 - Math.pow(1 - t, 2)).toFixed(4));
-      if (i === 0) runner.style.opacity = t > 0.94 || t === 0 ? 0 : 1;
-    });
+    const secTop = section.getBoundingClientRect().top;
+    const oneRow = !mobile;
+    const hA = mobile ? 92 : 150;                  // alto del canillita mientras señala
+    const a0 = vh - hA * 0.75;                     // empieza cuando ya se lo ve casi entero
+    const a1 = a0 - vh * 0.3;
+    const b1 = a1 - vh * 0.2;
+    const target = clamp((a0 - secTop) / (vh * 0.3)) + clamp((a1 - secTop) / (vh * 0.2)) + clamp((b1 - secTop) / (vh * 0.5));
+    const rows = places.map(place => (place.offsetTop === places[0].offsetTop
+      ? null
+      : clamp((vh * 0.9 - (secTop + place.offsetTop)) / (vh * 0.5))));
+    return { target, rows, oneRow, hA };
   }
-  const request = () => { if (!ticking) { ticking = true; requestAnimationFrame(update); } };
-  window.addEventListener('scroll', request, { passive: true });
-  window.addEventListener('resize', request);
-  update();
+
+  function render(m) {
+    const a = clamp(P);
+    const e = smooth(clamp(P - 1));
+    const pull = smooth(clamp(P - 2));
+
+    // 1. números (en celular rotan solos en una barra, no dependen del scroll)
+    if (!mobile) [0.05, 0.4, 0.75].forEach((at, i) => { if (stats[i]) stats[i].classList.toggle('is-in', a > at); });
+    const wA = m.hA * POINT_RATIO;
+    const pad = parseFloat(getComputedStyle(stats[0]).paddingLeft);
+    const xs = stats.map(stat => (m.oneRow ? stat.offsetLeft + pad + 90 : pad) + wA / 2);
+    let pos = 0;      // posición entre números (0, 1, 2), con un saltito al pasar de uno a otro
+    let hop = 0;
+    if (a > 0.25 && a < 0.4) { const f = (a - 0.25) / 0.15; pos = smooth(f); hop = Math.sin(Math.PI * f); }
+    else if (a >= 0.4 && a <= 0.6) pos = 1;
+    else if (a > 0.6 && a < 0.75) { const f = (a - 0.6) / 0.15; pos = 1 + smooth(f); hop = Math.sin(Math.PI * f); }
+    else if (a >= 0.75) pos = 2;
+    const i0 = Math.min(xs.length - 1, Math.floor(pos));
+    const i1 = Math.min(xs.length - 1, i0 + 1);
+    const cxA = lerp(xs[i0], xs[i1], pos - i0);
+    const cyA = 14 + m.hA / 2 - hop * 16;
+
+    // 3. puestos: todos se corren la misma distancia, la que deja al primero justo fuera de pantalla
+    const first = places[0];
+    const D = section.clientWidth - first.offsetLeft + 10;
+    places.forEach((place, i) => {
+      const t = m.rows[i] === null ? pull : smooth(rowPull[i]);
+      place.style.setProperty('--tx', `${((1 - t) * D).toFixed(1)}px`);
+    });
+
+    // el canillita: de la posición de señalar a la de correr, agarrado del primer puesto
+    const hR = m.oneRow ? Math.min(300, first.offsetHeight * 0.6) : 170;
+    const wR = hR * RUN_RATIO;
+    const cxH = first.offsetLeft + (1 - pull) * D - wR / 2 + 2;
+    const cyH = first.offsetTop + (m.oneRow ? 48 : 24) + hR / 2;
+    cani.style.transform = `translate(${lerp(cxA, cxH, e).toFixed(1)}px, ${lerp(cyA, cyH, e).toFixed(1)}px)`;
+    cani.style.setProperty('--h', `${lerp(m.hA, hR, e).toFixed(1)}px`);
+    const swap = clamp((e - 0.25) / 0.5);          // cambio de pose a mitad de la bajada
+    pointImg.style.opacity = 1 - swap;
+    runImg.style.opacity = swap;
+    cani.classList.toggle('is-in', a > 0.01 && pull < 0.95);
+  }
+
+  function step(now) {
+    const dt = Math.min(0.05, (now - last) / 1000);
+    last = now;
+    const m = measure();
+    let moving = false;
+
+    // velocidad máxima por etapa (unidades de progreso por segundo); si quedó muy atrás, se apura
+    const d = m.target - P;
+    if (Math.abs(d) > 0.0005) {
+      let speed = P < 1 ? 0.85 : P < 2 ? 1.6 : 0.8;
+      if (Math.abs(d) > 2) speed *= 1.6;
+      P += Math.sign(d) * Math.min(Math.abs(d), speed * dt);
+      moving = true;
+    }
+    m.rows.forEach((t, i) => {
+      if (t === null) return;
+      const dr = t - rowPull[i];
+      if (Math.abs(dr) > 0.0005) { rowPull[i] += Math.sign(dr) * Math.min(Math.abs(dr), 0.9 * dt); moving = true; }
+    });
+
+    render(m);
+    if (moving) requestAnimationFrame(step);
+    else running = false;
+  }
+  function kick() {
+    if (running) return;
+    running = true;
+    last = performance.now();
+    requestAnimationFrame(step);
+  }
+  window.addEventListener('scroll', kick, { passive: true });
+  window.addEventListener('resize', kick);
+  render(measure());
+  kick();
 })();
 
-// Centro de producción propio y Comunidad: un canillita corre tirando de la soga y trae las tarjetas.
-// Cada sección entra del lado contrario a la de arriba (Puestos: derecha, Producción: izquierda,
-// Comunidad: derecha). Sigue al scroll y vuelve atrás si subís.
-// Los dos dibujos corren hacia la derecha; para traer desde la derecha se espejan.
+// Centro de producción propio, Comunidad y Activá tu marca: un canillita corre tirando de la soga
+// y trae las tarjetas. Cada sección entra del lado contrario a la de arriba (Puestos: derecha,
+// Producción: izquierda, Comunidad: derecha, Activá tu marca: izquierda, Nosotros: derecha).
+// Sigue al scroll y vuelve atrás si subís, con velocidad máxima para que siempre se llegue a ver.
+// Los dibujos corren hacia la derecha; para traer desde la derecha se espejan.
 [
   ['#productos', 'canillita-carrusel-cookie.webp', 760 / 650, 'left'],
   ['#comunidad', 'canillita-carrusel-comunidad.webp', 760 / 633, 'right'],
-].forEach(function ([selector, image, ratio, from]) {
+  ['#activa', 'canillita-marca.webp', 760 / 522, 'left'],
+  // Nosotros: el canillita enamorado trae la foto de los fundadores
+  ['#nosotros', 'canillita-enamorado.webp', 760 / 688, 'right', '.about', '.founders'],
+].forEach(function ([selector, image, ratio, from, box, items]) {
   const section = document.querySelector(selector);
   if (!section) return;
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  const grid = section.querySelector('.grid');
-  const cards = [...grid.children];
+  // celular: las tarjetas van en un carrusel de una fila y se trae la fila entera
+  const mobile = !box && window.matchMedia('(max-width: 760px)').matches;
+  const grid = mobile ? section : section.querySelector(box || '.grid');
+  const cards = mobile ? [section.querySelector('.grid')]
+    : items ? [...grid.querySelectorAll(items)] : [...grid.children];
+  grid.dataset.pullBox = '';
+  cards.forEach(card => { card.dataset.pull = ''; });
   const clamp = v => Math.max(0, Math.min(1, v));
+  const smooth = t => t * t * (3 - 2 * t);
 
   const runner = document.createElement('div');
   runner.className = 'grid__runner';
@@ -252,55 +322,85 @@
   section.classList.add('is-pulled-x');
   section.style.setProperty('--dir', from === 'right' ? 1 : -1);
 
-  let ticking = false;
-  function update() {
-    ticking = false;
-    const vh = window.innerHeight;
-    const gridTop = grid.getBoundingClientRect().top;
+  const state = cards.map(() => 0);
+  let running = false;
+  let last = 0;
+
+  function render() {
     // el canillita va adelante de la primera fila: agarrado de la última tarjeta si vienen
     // desde la izquierda, o de la primera si vienen desde la derecha
     const firstRow = cards.filter(card => card.offsetTop === cards[0].offsetTop);
     const lead = from === 'right' ? firstRow[0] : firstRow[firstRow.length - 1];
-    cards.forEach(card => {
-      const top = gridTop + card.offsetTop;
-      const t = clamp((vh * 0.82 - top) / (vh * 0.5));
-      const pull = (1 - Math.pow(1 - t, 2)).toFixed(4);
+    cards.forEach((card, i) => {
+      const pull = smooth(state[i]).toFixed(4);
       card.style.setProperty('--pull', pull);
-      if (card === lead) {
-        const h = Math.min(300, card.offsetHeight * 0.75);
-        runner.style.height = `${h}px`;
-        runner.style.width = `${h * ratio}px`;
-        runner.style.left = from === 'right'
-          ? `${card.offsetLeft - h * ratio + 2}px`
-          : `${card.offsetLeft + card.offsetWidth - 2}px`;
-        runner.style.top = `${card.offsetTop + (card.offsetHeight - h) / 2}px`;
-        runner.style.setProperty('--pull', pull);
-        runner.style.opacity = t > 0.94 || t === 0 ? 0 : 1;
-      }
+      if (card !== lead) return;
+      const h = Math.min(mobile ? 180 : 300, card.offsetHeight * 0.75);
+      runner.style.height = `${h}px`;
+      runner.style.width = `${h * ratio}px`;
+      runner.style.left = from === 'right'
+        ? `${card.offsetLeft - h * ratio + 2}px`
+        : `${card.offsetLeft + card.offsetWidth - 2}px`;
+      runner.style.top = `${card.offsetTop + (card.offsetHeight - h) / 2}px`;
+      runner.style.setProperty('--pull', pull);
+      runner.style.opacity = state[i] > 0.96 || state[i] === 0 ? 0 : 1;
     });
   }
-  const request = () => { if (!ticking) { ticking = true; requestAnimationFrame(update); } };
-  window.addEventListener('scroll', request, { passive: true });
-  window.addEventListener('resize', request);
-  update();
+
+  function step(now) {
+    const dt = Math.min(0.05, (now - last) / 1000);
+    last = now;
+    const vh = window.innerHeight;
+    const gridTop = grid.getBoundingClientRect().top;
+    let moving = false;
+    cards.forEach((card, i) => {
+      const target = clamp((vh * 0.9 - (gridTop + card.offsetTop)) / (vh * 0.55));
+      const d = target - state[i];
+      if (Math.abs(d) > 0.0005) { state[i] += Math.sign(d) * Math.min(Math.abs(d), 0.8 * dt); moving = true; }
+    });
+    render();
+    if (moving) requestAnimationFrame(step);
+    else running = false;
+  }
+  function kick() {
+    if (running) return;
+    running = true;
+    last = performance.now();
+    requestAnimationFrame(step);
+  }
+  window.addEventListener('scroll', kick, { passive: true });
+  window.addEventListener('resize', kick);
+  render();
+  kick();
 });
 
-// Títulos: aparecen subiendo desde abajo cuando entran en pantalla
+// Títulos: cada palabra sube desde abajo, una tras otra, cuando el título entra en pantalla.
+// Si volvés a subir y el título queda por debajo de la pantalla, se prepara para repetirse.
 (function () {
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   const titles = document.querySelectorAll('.headline, .subhead, .invest h2');
   const io = new IntersectionObserver(entries => {
     entries.forEach(e => {
-      if (!e.isIntersecting) return;
-      e.target.classList.add('is-in');
-      io.unobserve(e.target);
+      if (e.isIntersecting) e.target.classList.add('is-in');
+      else if (e.boundingClientRect.top > 0) e.target.classList.remove('is-in');
     });
-  }, { threshold: 0.2 });
+  }, { rootMargin: '0px 0px -12% 0px', threshold: 0.35 });
   titles.forEach(title => {
-    const inner = document.createElement('span');
-    inner.className = 'rise__inner';
-    while (title.firstChild) inner.appendChild(title.firstChild);
-    title.appendChild(inner);
+    const words = title.textContent.trim().split(/\s+/);
+    title.setAttribute('aria-label', words.join(' '));
+    title.textContent = '';
+    words.forEach((word, i) => {
+      const wrap = document.createElement('span');
+      wrap.className = 'rise__word';
+      wrap.setAttribute('aria-hidden', 'true');
+      const inner = document.createElement('span');
+      inner.className = 'rise__inner';
+      inner.style.transitionDelay = `${i * 90}ms`;
+      inner.textContent = word;
+      wrap.appendChild(inner);
+      title.appendChild(wrap);
+      if (i < words.length - 1) title.appendChild(document.createTextNode(' '));
+    });
     title.classList.add('rise');
     io.observe(title);
   });
