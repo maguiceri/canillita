@@ -8,7 +8,7 @@
   <link rel="preload" as="font" type="font/woff2" href="fonts/anton.woff2" crossorigin>
   <link rel="preload" as="font" type="font/woff2" href="fonts/inter-tight.woff2" crossorigin>
   <link rel="preload" as="image" href="puestoAbierto.webp">
-  <link rel="stylesheet" href="styles.css?v=33">
+  <link rel="stylesheet" href="styles.css?v=36">
 </head>
 <body class="is-loading">
 
@@ -282,32 +282,34 @@
 
       <div class="block">
         <h3 class="subhead">Prensa</h3>
-        <!-- TODO: en .press-card__art va la ilustración del canillita leyendo el diario -->
-        <div class="grid grid--3">
-          <article class="press-card">
-            <div class="press-card__art"></div>
-            <div>
-              <h4>Forbes</h4>
-              <p>Título de la nota</p>
-              <a href="#nosotros">Leer la nota ›</a>
-            </div>
-          </article>
-          <article class="press-card">
-            <div class="press-card__art"></div>
-            <div>
-              <h4>iProfesional</h4>
-              <p>Título de la nota</p>
-              <a href="#nosotros">Leer la nota ›</a>
-            </div>
-          </article>
-          <article class="press-card">
-            <div class="press-card__art"></div>
-            <div>
-              <h4>Medio</h4>
-              <p>Título de la nota</p>
-              <a href="#nosotros">Leer la nota ›</a>
-            </div>
-          </article>
+        <!-- el canillita lee el diario (el nombre del medio va rotando) y del diario salen flechas a las notas -->
+        <div class="press" data-names="Clarín|TN|Infobae|Forbes|iProfesional|Ámbito">
+          <div class="press__art" aria-hidden="true">
+            <img src="canillita-clarin.webp" alt="" loading="lazy" width="900" height="790">
+            <span class="press__masthead"><span>Clarín</span></span>
+          </div>
+          <svg class="press__arrows" viewBox="0 0 1000 440" aria-hidden="true">
+            <path class="line" pathLength="1" style="--i: 0" d="M300 148 Q 410 80 540 46"/>
+            <path class="head" style="--i: 0" transform="translate(540 46) rotate(-14.7)" d="M-13 -8 L0 0 L-13 8"/>
+            <path class="line" pathLength="1" style="--i: 1" d="M300 148 Q 410 118 540 116"/>
+            <path class="head" style="--i: 1" transform="translate(540 116) rotate(-0.9)" d="M-13 -8 L0 0 L-13 8"/>
+            <path class="line" pathLength="1" style="--i: 2" d="M300 148 Q 400 156 540 185"/>
+            <path class="head" style="--i: 2" transform="translate(540 185) rotate(11.7)" d="M-13 -8 L0 0 L-13 8"/>
+            <path class="line" pathLength="1" style="--i: 3" d="M300 148 Q 400 195 540 255"/>
+            <path class="head" style="--i: 3" transform="translate(540 255) rotate(23.2)" d="M-13 -8 L0 0 L-13 8"/>
+            <path class="line" pathLength="1" style="--i: 4" d="M300 148 Q 400 233 540 325"/>
+            <path class="head" style="--i: 4" transform="translate(540 325) rotate(33.3)" d="M-13 -8 L0 0 L-13 8"/>
+            <path class="line" pathLength="1" style="--i: 5" d="M300 148 Q 400 271 540 394"/>
+            <path class="head" style="--i: 5" transform="translate(540 394) rotate(41.3)" d="M-13 -8 L0 0 L-13 8"/>
+          </svg>
+          <ul class="press__links">
+          <li style="--i: 0"><a href="https://www.clarin.com/arq/diseno/puestos-diarios-transicion-papel-cafe-especialidad-vereda_0_uFRvTOSLjr.html" target="_blank" rel="noopener"><strong>Clarín</strong><span>Leer la nota ›</span></a></li>
+          <li style="--i: 1"><a href="https://tn.com.ar/cocina/2024/08/16/conoce-canillita-un-cafe-de-especialidad-que-funciona-en-un-antiguo-puesto-de-diarios/" target="_blank" rel="noopener"><strong>TN</strong><span>Leer la nota ›</span></a></li>
+          <li style="--i: 2"><a href="https://www.infobae.com/sociedad/2024/08/06/los-jovenes-que-fundaron-una-cafeteria-de-especialidad-en-un-puesto-de-diario-del-centro-porteno/" target="_blank" rel="noopener"><strong>Infobae</strong><span>Leer la nota ›</span></a></li>
+          <li style="--i: 3"><a href="https://www.forbesargentina.com/negocios/tienen-menos-30-reinventaron-historico-negocio-ruinas-facturan-us-1-millon-ano-n90783" target="_blank" rel="noopener"><strong>Forbes</strong><span>Leer la nota ›</span></a></li>
+          <li style="--i: 4"><a href="https://www.iprofesional.com/negocios/454291-canillita-convirtieron-un-puesto-de-diarios-en-una-exitosa-red-de-cafeterias-costo-de-franquicia" target="_blank" rel="noopener"><strong>iProfesional</strong><span>Leer la nota ›</span></a></li>
+          <li style="--i: 5"><a href="https://www.ambito.com/informacion-general/revivieron-un-lugar-olvidado-la-ciudad-y-lo-convirtieron-un-espacio-urbano-cargado-historia-y-sabor-n6048377" target="_blank" rel="noopener"><strong>Ámbito Financiero</strong><span>Leer la nota ›</span></a></li>
+          </ul>
         </div>
       </div>
     </section>
@@ -347,6 +349,6 @@
     </nav>
   </footer>
 
-  <script src="script.js?v=33"></script>
+  <script src="script.js?v=36"></script>
 </body>
 </html>

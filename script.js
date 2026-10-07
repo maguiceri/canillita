@@ -327,8 +327,9 @@
   ['#comunidad', 'canillita-carrusel-comunidad.webp', 760 / 633, 'right'],
   ['#activa', 'canillita-marca.webp', 760 / 522, 'left'],
   // Nosotros: el canillita enamorado trae la foto de los fundadores
-  ['#nosotros', 'canillita-enamorado.webp', 760 / 688, 'right', '.about', '.founders'],
-].forEach(function ([selector, image, ratio, from, box, items]) {
+  // (se queda parado al lado de la foto: después viaja hasta el diario de Prensa)
+  ['#nosotros', 'canillita-enamorado.webp', 760 / 688, 'right', '.about', '.founders', { stay: true, h: 220 }],
+].forEach(function ([selector, image, ratio, from, box, items, opts = {}]) {
   const section = document.querySelector(selector);
   if (!section) return;
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
@@ -348,6 +349,7 @@
   runner.innerHTML = `<img src="${image}" alt="">`;
   if (from === 'right') runner.classList.add('is-flipped');
   grid.appendChild(runner);
+  section.runner = runner;
   section.classList.add('is-pulled-x');
   section.style.setProperty('--dir', from === 'right' ? 1 : -1);
 
@@ -365,15 +367,16 @@
       const pull = back(state[i]).toFixed(4);
       card.style.setProperty('--pull', pull);
       if (card !== lead) return;
-      const h = Math.min(mobile ? 210 : 340, card.offsetHeight * 0.85);
+      const h = Math.min(opts.h || (mobile ? 210 : 340), card.offsetHeight * 0.85);
       runner.style.height = `${h}px`;
       runner.style.width = `${h * ratio}px`;
       runner.style.left = from === 'right'
         ? `${card.offsetLeft - h * ratio + 2}px`
         : `${card.offsetLeft + card.offsetWidth - 2}px`;
-      runner.style.top = `${card.offsetTop + (card.offsetHeight - h) / 2}px`;
+      runner.style.top = `${card.offsetTop + (opts.stay ? card.offsetHeight - h : (card.offsetHeight - h) / 2)}px`;
       runner.style.setProperty('--pull', pull);
-      runner.style.opacity = state[i] > 0.96 || state[i] === 0 ? 0 : 1;
+      runner.style.opacity = state[i] === 0 || (state[i] > 0.96 && !opts.stay) ? 0 : 1;
+      runner.classList.toggle('is-idle', state[i] >= 1);
     });
   }
 
@@ -405,6 +408,102 @@
   render();
   kick();
 });
+
+// Prensa: el nombre del medio rota en la tapa del diario, las flechas y las notas aparecen de a una,
+// y (en computadora) el canillita enamorado viaja desde la foto de los fundadores hasta el diario.
+(function () {
+  const press = document.querySelector('.press');
+  if (!press) return;
+  const section = press.closest('section');
+  const art = press.querySelector('.press__art');
+  const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const clamp = v => Math.max(0, Math.min(1, v));
+  const lerp = (a, b, t) => a + (b - a) * t;
+  const smooth = t => t * t * (3 - 2 * t);
+
+  // nombre que rota en la tapa
+  const masthead = press.querySelector('.press__masthead');
+  const word = masthead.firstElementChild;
+  const names = press.dataset.names.split('|');
+  function fit() {
+    word.style.fontSize = '';
+    let size = parseFloat(getComputedStyle(word).fontSize);
+    while (word.scrollWidth > masthead.clientWidth && size > 6) { size -= 1; word.style.fontSize = `${size}px`; }
+  }
+  let index = 0;
+  if (!calm) {
+    setInterval(() => {
+      masthead.classList.add('is-swapping');
+      setTimeout(() => {
+        index = (index + 1) % names.length;
+        word.textContent = names[index];
+        fit();
+        masthead.classList.remove('is-swapping');
+      }, 300);
+    }, 2200);
+  }
+  window.addEventListener('resize', fit);
+  fit();
+  if (calm) return;
+
+  press.classList.add('is-staged');
+  const desktop = window.matchMedia('(min-width: 761px)').matches;
+  if (!desktop) {
+    // celular: sin viaje; las notas aparecen cuando el bloque entra en pantalla
+    new IntersectionObserver(([e], io) => {
+      if (e.isIntersecting) { press.classList.add('is-in'); io.disconnect(); }
+    }, { threshold: 0.3 }).observe(press);
+    return;
+  }
+
+  const morph = document.createElement('div');
+  morph.className = 'press__morph';
+  morph.setAttribute('aria-hidden', 'true');
+  morph.innerHTML = '<img src="canillita-enamorado.webp" alt="">';
+  section.appendChild(morph);
+
+  let q = 0;          // 0: al lado de la foto · 1: sentado leyendo
+  let running = false;
+  let last = 0;
+  function render() {
+    const runner = section.runner;
+    const box = section.getBoundingClientRect();
+    const artBox = art.getBoundingClientRect();
+    const from = runner ? runner.getBoundingClientRect() : artBox;
+    const e = smooth(q);
+    const x = lerp(from.left + from.width / 2, artBox.left + artBox.width * 0.48, e) - box.left;
+    const y = lerp(from.top + from.height / 2, artBox.top + artBox.height * 0.45, e) - box.top;
+    morph.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px)`;
+    morph.style.setProperty('--h', `${lerp(from.height, artBox.height * 0.8, e).toFixed(1)}px`);
+    const traveling = q > 0.02 && q < 1;
+    morph.style.visibility = traveling ? 'visible' : 'hidden';
+    morph.style.opacity = 1 - smooth(clamp((q - 0.6) / 0.4));
+    if (runner) runner.style.visibility = q > 0.02 ? 'hidden' : '';
+    art.style.opacity = smooth(clamp((q - 0.5) / 0.5));
+    if (q > 0.9) press.classList.add('is-in');
+  }
+  function step(now) {
+    const dt = Math.min(0.05, (now - last) / 1000);
+    last = now;
+    const vh = window.innerHeight;
+    const target = clamp((vh * 0.85 - press.getBoundingClientRect().top) / (vh * 0.3));
+    const d = target - q;
+    if (Math.abs(d) > 0.0005) q += Math.sign(d) * Math.min(Math.abs(d), 0.9 * dt);
+    render();
+    if (Math.abs(target - q) > 0.0005) requestAnimationFrame(step);
+    else running = false;
+  }
+  function kick() {
+    if (running) return;
+    running = true;
+    last = performance.now();
+    requestAnimationFrame(step);
+  }
+  window.addEventListener('scroll', kick, { passive: true });
+  window.addEventListener('resize', kick);
+  render();
+  kick();
+})();
 
 // Títulos: cada palabra sube desde abajo, una tras otra, cuando el título entra en pantalla.
 // Si volvés a subir y el título queda por debajo de la pantalla, se prepara para repetirse.
