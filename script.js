@@ -155,6 +155,24 @@
   });
 })();
 
+// Números en celular: una barra donde los datos pasan en fila, en loop.
+// Se duplican dentro de una pista para que el loop no tenga corte.
+(function () {
+  const strip = document.querySelector('.stats');
+  if (!strip || !window.matchMedia('(max-width: 760px)').matches) return;
+  const track = document.createElement('div');
+  track.className = 'stats__track';
+  const stats = [...strip.children];
+  stats.forEach(stat => track.appendChild(stat));
+  stats.forEach(stat => {
+    const copy = stat.cloneNode(true);
+    copy.setAttribute('aria-hidden', 'true');
+    track.appendChild(copy);
+  });
+  strip.appendChild(track);
+  strip.classList.add('is-marquee');
+})();
+
 // Números y Puestos: una sola escena con un único canillita.
 //   1. Parado en el verde, debajo de los números, los señala de a uno y van apareciendo.
 //   2. Baja hasta la fila de puestos mientras cambia de pose (de señalar a correr con la soga).
@@ -191,6 +209,7 @@
 
   // progreso de la escena: 0–1 señalar, 1–2 bajar y cambiar de pose, 2–3 traer los puestos
   let P = 0;
+  let latched = 0;
   const rowPull = places.map(() => 0);   // puestos de otras filas (celular): cada uno entra al llegar a él
   let running = false;
   let last = 0;
@@ -203,7 +222,14 @@
     const a0 = vh - hA * 0.75;                     // empieza cuando ya se lo ve casi entero
     const a1 = a0 - vh * 0.3;
     const b1 = a1 - vh * 0.2;
-    const target = clamp((a0 - secTop) / (vh * 0.3)) + clamp((a1 - secTop) / (vh * 0.2)) + clamp((b1 - secTop) / (vh * 0.5));
+    let target = clamp((a0 - secTop) / (vh * 0.3)) + clamp((a1 - secTop) / (vh * 0.2)) + clamp((b1 - secTop) / (vh * 0.5));
+    if (mobile) {
+      // celular: no acompaña al scroll. Aparece señalando cuando se lo ve, y cuando el carrusel
+      // ya está en pantalla hace toda la secuencia de traerlo, una sola vez
+      if (secTop < a0) latched = Math.max(latched, 1);
+      if (secTop + places[0].offsetTop < vh * 0.75) latched = 3;
+      target = latched;
+    }
     const rows = places.map(place => (place.offsetTop === places[0].offsetTop
       ? null
       : clamp((vh * 0.9 - (secTop + place.offsetTop)) / (vh * 0.5))));
@@ -323,6 +349,7 @@
   section.style.setProperty('--dir', from === 'right' ? 1 : -1);
 
   const state = cards.map(() => 0);
+  let done = false;
   let running = false;
   let last = 0;
 
@@ -354,7 +381,9 @@
     const gridTop = grid.getBoundingClientRect().top;
     let moving = false;
     cards.forEach((card, i) => {
-      const target = clamp((vh * 0.9 - (gridTop + card.offsetTop)) / (vh * 0.55));
+      // celular: no acompaña al scroll; se dispara una sola vez cuando el carrusel ya está en pantalla
+      if (mobile && gridTop + card.offsetTop < vh * 0.75) done = true;
+      const target = mobile ? (done ? 1 : 0) : clamp((vh * 0.9 - (gridTop + card.offsetTop)) / (vh * 0.55));
       const d = target - state[i];
       if (Math.abs(d) > 0.0005) { state[i] += Math.sign(d) * Math.min(Math.abs(d), 0.8 * dt); moving = true; }
     });

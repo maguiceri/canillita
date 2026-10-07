@@ -959,20 +959,23 @@ a.card--media:active { opacity: .85; }
   .invest { padding: 40px 0 48px; }
   .invest .btn { width: 100%; text-align: center; }
   #puestos { padding-top: 104px; }
-  /* números: una sola barra que va rotando los tres datos */
-  .stats { display: block; position: relative; height: 112px; overflow: hidden; }
+  /* números: una sola barra donde los datos pasan en fila, en loop (script.js arma .stats__track) */
+  .stats { display: flex; overflow-x: auto; scrollbar-width: none; }
+  .stats::-webkit-scrollbar { display: none; }
+  .stats.is-marquee { display: block; overflow: hidden; }
+  .stats__track { display: flex; width: max-content; animation: stats-marquee 24s linear infinite; }
   .stat {
-    position: absolute;
-    inset: 0;
-    justify-content: center;
-    padding: 0 var(--gutter);
-    opacity: 0;
-    animation: stat-cycle 9s infinite;
+    flex: none;
+    flex-direction: row;
+    align-items: baseline;
+    gap: 10px;
+    padding: 18px 26px;
+    white-space: nowrap;
   }
-  .stat + .stat { border-top: 0; }
-  .stat:nth-child(2) { animation-delay: 3s; }
-  .stat:nth-child(3) { animation-delay: 6s; }
-  .stat strong { font-size: 52px; }
+  .stat + .stat { border-top: 0; border-left: 0; }
+  .stat { border-right: 1px solid var(--verde-cani); }
+  .stat strong { font-size: 40px; }
+  .stat span { font-size: 15px; }
 
   /* tarjetas en una sola fila, tipo carrusel: se deslizan con el dedo y la siguiente asoma */
   #puestos .grid,
@@ -1003,16 +1006,14 @@ a.card--media:active { opacity: .85; }
   .footer__nav a { padding: 11px 0; }
 }
 
-@keyframes stat-cycle {
-  0% { opacity: 0; transform: translateY(18px); }
-  5%, 30% { opacity: 1; transform: none; }
-  35%, 100% { opacity: 0; transform: translateY(-18px); }
+@keyframes stats-marquee {
+  to { transform: translateX(-50%); }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .intro { display: none; }
-  .stat { animation: none; }
-  .stat:first-child { opacity: 1; }
+  .stats__track { animation: none; }
+  .stats.is-marquee { overflow-x: auto; }
   .slides img { animation: none; }
   .slides img:first-child { opacity: 1; }
 }
